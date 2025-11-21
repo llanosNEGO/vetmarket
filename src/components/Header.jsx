@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 export const Header = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -45,10 +46,10 @@ export const Header = () => {
                     </div>
 
                     <div className="hidden md:flex md:items-center md:space-x-4">
-                        <button className="flex items-center space-x-1 text-gray-700 hover:text-[var(--primary)] transition-colors">
+                        <Link to="/login" className="flex items-center space-x-1 text-gray-700 hover:text-[var(--primary)] transition-colors">
                             <img src="../public/images/usuario.svg" alt="User" className="h-7" />
                             <span className="font-medium">Mi cuenta</span>
-                        </button>
+                        </Link>
                         
                         <button className="flex items-center space-x-1 text-gray-700 hover:text-[var(--primary)] transition-colors relative">
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -113,7 +114,7 @@ export const Header = () => {
                     <a href="#" className="block px-4 py-3 text-gray-700 hover:bg-gray-50 font-medium">Servicios</a>
                     <a href="#" className="block px-4 py-3 text-gray-700 hover:bg-gray-50 font-medium">Contacto</a>
                     <div className="border-t border-gray-200 mt-2 pt-2">
-                        <a href="#" className="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 font-medium">
+                        <a href="/login" className="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 font-medium">
                             <img src="../public/images/usuario.svg" alt="User" className="h-5 w-5 mr-2" />
                             Mi cuenta
                         </a>
