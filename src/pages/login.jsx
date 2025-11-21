@@ -36,7 +36,7 @@ export const Login = () => {
                 <div className="flex justify-center">
                     <Link to="/">
                         <img 
-                            src="../public/images/logo_vetmarketpe.svg" 
+                            src="/images/logo_vetmarketpe.svg" 
                             alt="VetMarketPE" 
                             className="h-16 w-auto"
                         />
