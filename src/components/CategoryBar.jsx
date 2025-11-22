@@ -130,7 +130,7 @@ export const CategoryBar = () => {
     
 
 return (
-        <nav className="w-full bg-white py-4 relative z-50"> {/* z-50 para que el menu flote sobre otros elementos */}
+        <nav className="w-full bg-white py-4 relative z-50">
             <div className="container mx-auto px-4">
                 
                 {/* BARRA GRIS PRINCIPAL */}
