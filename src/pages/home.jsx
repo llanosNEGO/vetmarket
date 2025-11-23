@@ -3,6 +3,7 @@ import  {CategoryBar}  from '../components/CategoryBar';
 import CarouselBar from '../components/CarouselBar';
 import ProductCarousel from '../components/ProductCarousel';
 import { Footer } from '../components/footer';
+import { CategoryPopulation } from '../components/CategoryPopulation';
 
 export const Home = () => {
     return (
@@ -11,6 +12,7 @@ export const Home = () => {
             <CategoryBar />         
             <CarouselBar />
             <ProductCarousel />
+            <CategoryPopulation />
             <Footer />
         </div>       
             

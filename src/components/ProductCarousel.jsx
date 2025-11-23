@@ -75,7 +75,6 @@ export default function ProductCarousel() {
           </SwiperSlide>
         ))}
         
-        {/* Botones de navegación personalizados */}
         <div className="custom-prev absolute text-white top-1/2 left-2 z-10 transform -translate-y-1/2 bg-gray-800/80 hover:bg-gray-800/100 rounded-full w-10 h-10 flex items-center justify-center cursor-pointer transition-all text-xl font-bold shadow-lg">
           ‹
         </div>
