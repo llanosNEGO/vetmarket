@@ -1,19 +1,19 @@
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, Keyboard } from 'swiper/modules'; // Quitamos Pagination si no se usa puntos abajo
+import { Navigation, Keyboard, Autoplay } from 'swiper/modules';
 import { useState } from 'react';
 
 import 'swiper/css';
 import 'swiper/css/navigation';
+import 'swiper/css/autoplay';
 
 export default function ProductCarousel() {
-  // He añadido más productos (duplicados) para que el loop infinito funcione suavemente
   const [products] = useState([
     { id: 1, brand: "ROYAL CANIN", name: "Royal Canin BHN Bulldog ADULT CD x 3 kg", price: "S/ 160.00", image: "/images/slide-1.svg" },
     { id: 2, brand: "ROYAL CANIN", name: "Royal Canin BHN FR Bulldog ADULT CD bolsa x 9kg", price: "S/ 0.00", image: "/images/slide-1.svg" },
     { id: 3, brand: "BIOFRESH", name: "BIOFRESH GATO Adulto Salmon bolsa x 1.5 kg", price: "S/ 70.00", image: "/images/slide-1.svg" },
     { id: 4, brand: "BIOFRESH", name: "BIOFRESH GATITO Pollo bolsa x 1.5 kg", price: "S/ 75.00", image: "/images/slide-1.svg" },
     { id: 5, brand: "ROYAL CANIN", name: "Royal Canin CCN MINI LIGHT WCARE Dog bolsa x 3kg", price: "S/ 175.00", image: "/images/slide-1.svg" },
-    { id: 6, brand: "ROYAL CANIN", name: "Royal Canin Maxi Puppy x 15 kg", price: "S/ 320.00", image: "/images/slide-1.svg" },-
+    { id: 6, brand: "ROYAL CANIN", name: "Royal Canin Maxi Puppy x 15 kg", price: "S/ 320.00", image: "/images/slide-1.svg" },
     { id: 7, brand: "ROYAL CANIN", name: "Royal Canin BHN Bulldog ADULT CD x 3 kg", price: "S/ 160.00", image: "/images/slide-1.svg" },
     { id: 8, brand: "ROYAL CANIN", name: "Royal Canin BHN FR Bulldog ADULT CD bolsa x 9kg", price: "S/ 0.00", image: "/images/slide-1.svg" },
     { id: 9, brand: "BIOFRESH", name: "BIOFRESH GATO Adulto Salmon bolsa x 1.5 kg", price: "S/ 70.00", image: "/images/slide-1.svg" },
@@ -27,9 +27,17 @@ export default function ProductCarousel() {
       </h1>
       <Swiper
         loop={true}
-        navigation={true}
+        navigation={{
+          nextEl: '.custom-next',
+          prevEl: '.custom-prev',
+        }}
         keyboard={true}
-        modules={[Navigation, Keyboard]}
+        autoplay={{
+          delay: 3000, // 3 segundos entre cada slide
+          disableOnInteraction: false, // Continúa después de la interacción del usuario
+          pauseOnMouseEnter: true, // Pausa cuando el mouse está sobre el carousel
+        }}
+        modules={[Navigation, Keyboard, Autoplay]}
         // Breakpoints para responsividad
         breakpoints={{
           640: { slidesPerView: 2, spaceBetween: 20 },
@@ -37,35 +45,8 @@ export default function ProductCarousel() {
           1024: { slidesPerView: 4, spaceBetween: 30 },
           1280: { slidesPerView: 5, spaceBetween: 30 },
         }}
-        className="
-          mySwiper !pb-10
-          
-          /* === Estilos de Flechas === */
-          [&_.swiper-button-next]:bg-white
-          [&_.swiper-button-prev]:bg-white
-          [&_.swiper-button-next]:text-gray-800
-          [&_.swiper-button-prev]:text-gray-800
-          [&_.swiper-button-next]:w-10
-          [&_.swiper-button-prev]:w-10
-          [&_.swiper-button-next]:h-10
-          [&_.swiper-button-prev]:h-10
-          [&_.swiper-button-next]:rounded-full
-          [&_.swiper-button-prev]:rounded-full
-          [&_.swiper-button-next]:shadow-md
-          [&_.swiper-button-prev]:shadow-md
-          [&_.swiper-button-next]:border
-          [&_.swiper-button-prev]:border
-          [&_.swiper-button-next]:border-gray-200
-          [&_.swiper-button-prev]:border-gray-200
-          [&_.swiper-button-next]:after:text-[0.5rem]
-          [&_.swiper-button-prev]:after:text-[0.5rem]
-          [&_.swiper-button-next:hover]:bg-gray-50
-          [&_.swiper-button-prev:hover]:bg-gray-50
-          
-          /* Posición Flechas */
-          [&_.swiper-button-next]:-right-2
-          [&_.swiper-button-prev]:-left-2
-        "
+        speed={800} // Velocidad de transición
+        className="mySwiper !pb-10"
       >
         {products.map((product) => (
           <SwiperSlide key={product.id} className="h-auto">
@@ -93,6 +74,14 @@ export default function ProductCarousel() {
             </div>
           </SwiperSlide>
         ))}
+        
+        {/* Botones de navegación personalizados */}
+        <div className="custom-prev absolute text-white top-1/2 left-2 z-10 transform -translate-y-1/2 bg-gray-800/80 hover:bg-gray-800/100 rounded-full w-10 h-10 flex items-center justify-center cursor-pointer transition-all text-xl font-bold shadow-lg">
+          ‹
+        </div>
+        <div className="custom-next absolute text-white top-1/2 right-2 z-10 transform -translate-y-1/2 bg-gray-800/80 hover:bg-gray-800/100 rounded-full w-10 h-10 flex items-center justify-center cursor-pointer transition-all text-xl font-bold shadow-lg">
+          ›
+        </div>
       </Swiper>
     </div>
   );
