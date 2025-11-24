@@ -1,6 +1,7 @@
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Keyboard, Autoplay } from 'swiper/modules';
 import { useState } from 'react';
+import { useCart } from '../context/CartContext';
 
 import 'swiper/css';
 import 'swiper/css/navigation';
@@ -8,17 +9,18 @@ import 'swiper/css/autoplay';
 
 export default function ProductCarousel() {
   const [products] = useState([
-    { id: 1, brand: "ROYAL CANIN", name: "Royal Canin BHN Bulldog ADULT CD x 3 kg", price: "S/ 160.00", image: "/images/slide-1.svg" },
-    { id: 2, brand: "ROYAL CANIN", name: "Royal Canin BHN FR Bulldog ADULT CD bolsa x 9kg", price: "S/ 0.00", image: "/images/slide-1.svg" },
-    { id: 3, brand: "BIOFRESH", name: "BIOFRESH GATO Adulto Salmon bolsa x 1.5 kg", price: "S/ 70.00", image: "/images/slide-1.svg" },
-    { id: 4, brand: "BIOFRESH", name: "BIOFRESH GATITO Pollo bolsa x 1.5 kg", price: "S/ 75.00", image: "/images/slide-1.svg" },
-    { id: 5, brand: "ROYAL CANIN", name: "Royal Canin CCN MINI LIGHT WCARE Dog bolsa x 3kg", price: "S/ 175.00", image: "/images/slide-1.svg" },
-    { id: 6, brand: "ROYAL CANIN", name: "Royal Canin Maxi Puppy x 15 kg", price: "S/ 320.00", image: "/images/slide-1.svg" },
-    { id: 7, brand: "ROYAL CANIN", name: "Royal Canin BHN Bulldog ADULT CD x 3 kg", price: "S/ 160.00", image: "/images/slide-1.svg" },
-    { id: 8, brand: "ROYAL CANIN", name: "Royal Canin BHN FR Bulldog ADULT CD bolsa x 9kg", price: "S/ 0.00", image: "/images/slide-1.svg" },
-    { id: 9, brand: "BIOFRESH", name: "BIOFRESH GATO Adulto Salmon bolsa x 1.5 kg", price: "S/ 70.00", image: "/images/slide-1.svg" },
-    { id: 10, brand: "BIOFRESH", name: "BIOFRESH GATITO Pollo bolsa x 1.5 kg", price: "S/ 75.00", image: "/images/slide-1.svg" },
+    { id: 1, brand: "ROYAL CANIN", name: "Royal Canin BHN Bulldog ADULT CD x 3 kg", price: "S/ 160.00", image: "/images/004187-.jpg" },
+    { id: 2, brand: "ROYAL CANIN", name: "Royal Canin BHN FR Bulldog ADULT CD bolsa x 9kg", price: "S/ 0.00", image: "/images/004186-.jpg" },
+    { id: 3, brand: "BIOFRESH", name: "BIOFRESH GATO Adulto Salmon bolsa x 1.5 kg", price: "S/ 70.00", image: "/images/004332-.jpg" },
+    { id: 4, brand: "BIOFRESH", name: "BIOFRESH GATITO Pollo bolsa x 1.5 kg", price: "S/ 75.00", image: "/images/Biofresh-Pollo-1-5-kg-Gatito.webp" },
+    { id: 5, brand: "ROYAL CANIN", name: "Royal Canin CCN MINI LIGHT WCARE Dog bolsa x 3kg", price: "S/ 175.00", image: "/images/AP001522-1.webp" },
+    { id: 6, brand: "ROYAL CANIN", name: "Royal Canin Maxi Puppy x 15 kg", price: "S/ 320.00", image: "/images/royal-canin-maxi-puppy-x-15-kg.jpg" },
+    { id: 7, brand: "ROYAL CANIN", name: "Royal Canin BHN Bulldog ADULT CD x 3 kg", price: "S/ 160.00", image: "/images/004187-.jpg" },
+    { id: 8, brand: "ROYAL CANIN", name: "Royal Canin BHN FR Bulldog ADULT CD bolsa x 9kg", price: "S/ 0.00", image: "/images/004186-.jpg" },
+    { id: 9, brand: "BIOFRESH", name: "BIOFRESH GATO Adulto Salmon bolsa x 1.5 kg", price: "S/ 70.00", image: "/images/004332-.jpg" },
+    { id: 10, brand: "BIOFRESH", name: "BIOFRESH GATITO Pollo bolsa x 1.5 kg", price: "S/ 75.00", image: "/images/Biofresh-Pollo-1-5-kg-Gatito.webp" },
   ]);
+  const { addToCart } = useCart();
 
   return (
     <div className="w-full max-w-[1610px] mx-auto py-10 px-4 md:px-12 relative">
@@ -65,11 +67,24 @@ export default function ProductCarousel() {
               </div>
 
               {/* Botón */}
-              <button className="w-full bg-green-700 hover:bg-green-800 text-white font-bold py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="9" cy="21" r="1" /><circle cx="20" cy="21" r="1" /><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
-                </svg>
-                Agregar
+              <button 
+                  onClick={() => {
+                      addToCart({
+                          id: product.id,
+                          name: product.name,
+                          price: product.price,
+                          brand: product.brand,
+                          image: product.image,
+                          seller: 'VetMarket',
+                          maxQuantity: 10
+                      });
+                  }}
+                  className="w-full bg-green-700 hover:bg-green-800 text-white font-bold py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors"
+              >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="9" cy="21" r="1" /><circle cx="20" cy="21" r="1" /><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+                  </svg>
+                  Agregar
               </button>
             </div>
           </SwiperSlide>
