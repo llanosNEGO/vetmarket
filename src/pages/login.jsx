@@ -1,33 +1,61 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { authService } from "../services/api";
 
 export const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState("");
+    const navigate = useNavigate();
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        setError("");
         setIsLoading(true);
-        // Simular proceso de login
-        setTimeout(() => {
-            console.log("Login attempt:", { email, password });
+
+        try {
+            const response = await authService.login(email, password);
+            
+            if (response.data.success) {
+                console.log("Login exitoso:", response.data.user);
+                
+                // Guardar información del usuario en localStorage
+                localStorage.setItem('user', JSON.stringify(response.data.user));
+                
+                // Redirigir al dashboard o página principal
+                navigate("/welcome");
+            }
+        } catch (err) {
+            console.error("Error en login:", err);
+            setError(err.response?.data?.error || "Error de conexión con el servidor");
+        } finally {
             setIsLoading(false);
-        }, 1500);
+        }
     };
 
     const handleGoogleLogin = () => {
         setIsLoading(true);
+        setError("");
         // Lógica para login con Google
         console.log("Google login");
-        setTimeout(() => setIsLoading(false), 1500);
+        // Aquí puedes integrar con tu backend para login con Google
+        setTimeout(() => {
+            setIsLoading(false);
+            setError("Login con Google no implementado aún");
+        }, 1500);
     };
 
     const handleFacebookLogin = () => {
         setIsLoading(true);
+        setError("");
         // Lógica para login con Facebook
         console.log("Facebook login");
-        setTimeout(() => setIsLoading(false), 1500);
+        // Aquí puedes integrar con tu backend para login con Facebook
+        setTimeout(() => {
+            setIsLoading(false);
+            setError("Login con Facebook no implementado aún");
+        }, 1500);
     };
 
     return (
@@ -55,6 +83,14 @@ export const Login = () => {
 
             <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
                 <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+                    
+                    {/* Mostrar error */}
+                    {error && (
+                        <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+                            {error}
+                        </div>
+                    )}
+
                     <div className="space-y-3">
                         <button
                             type="button"
@@ -110,7 +146,8 @@ export const Login = () => {
                                     required
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    className="appearance-none block text-black bg-gray-200 w-full px-3 py-2 border border-gray-200 rounded-md placeholder-gray-400 focus:outline-none focus:ring-[var(--primary)] focus:border-[var(--primary)] sm:text-sm"
+                                    disabled={isLoading}
+                                    className="appearance-none block text-black bg-gray-200 w-full px-3 py-2 border border-gray-200 rounded-md placeholder-gray-400 focus:outline-none focus:ring-[var(--primary)] focus:border-[var(--primary)] sm:text-sm disabled:opacity-50"
                                     placeholder="correo@gmail.com"
                                 />
                             </div>
@@ -129,7 +166,8 @@ export const Login = () => {
                                     required
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="appearance-none block w-full text-black bg-gray-200 px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-[var(--primary)] focus:border-[var(--primary)] sm:text-sm"
+                                    disabled={isLoading}
+                                    className="appearance-none block w-full text-black bg-gray-200 px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-[var(--primary)] focus:border-[var(--primary)] sm:text-sm disabled:opacity-50"
                                     placeholder="Tu contraseña"
                                 />
                             </div>
@@ -141,7 +179,8 @@ export const Login = () => {
                                     id="remember-me"
                                     name="remember-me"
                                     type="checkbox"
-                                    className="h-4 w-4 text-[var(--primary)] focus:ring-[var(--primary)] border-gray-300 rounded"
+                                    disabled={isLoading}
+                                    className="h-4 w-4 text-[var(--primary)] focus:ring-[var(--primary)] border-gray-300 rounded disabled:opacity-50"
                                 />
                                 <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
                                     Recordarme
