@@ -69,8 +69,12 @@ export const CartProvider = ({ children }) => {
     return cartItems
       .filter(item => item.selected)
       .reduce((total, item) => {
-        const priceString = item.price || '0';
-        const price = parseFloat(typeof priceString === 'string' ? priceString.replace('S/ ', '') : priceString);
+        // Soportar ambos formatos: precio (número) y price (string)
+        const price = item.precio || parseFloat(
+          typeof item.price === 'string' 
+            ? item.price.replace('S/ ', '') 
+            : (item.price || 0)
+        );
         return total + (price * item.quantity);
       }, 0);
   };
@@ -83,10 +87,17 @@ export const CartProvider = ({ children }) => {
     return cartItems
       .filter(item => item.selected && item.discount)
       .reduce((total, item) => {
-        const originalPriceString = item.originalPrice || '0';
-        const currentPriceString = item.price || '0';
-        const originalPrice = parseFloat(typeof originalPriceString === 'string' ? originalPriceString.replace('S/ ', '') : originalPriceString);
-        const currentPrice = parseFloat(typeof currentPriceString === 'string' ? currentPriceString.replace('S/ ', '') : currentPriceString);
+        // Soportar ambos formatos: precio (número) y price (string)
+        const originalPrice = item.originalPrice || parseFloat(
+          typeof item.originalPrice === 'string' 
+            ? item.originalPrice.replace('S/ ', '') 
+            : (item.originalPrice || 0)
+        );
+        const currentPrice = item.precio || parseFloat(
+          typeof item.price === 'string' 
+            ? item.price.replace('S/ ', '') 
+            : (item.price || 0)
+        );
         const discountAmount = (originalPrice - currentPrice) * item.quantity;
         return total + discountAmount;
       }, 0);

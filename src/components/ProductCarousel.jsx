@@ -106,12 +106,12 @@ export default function ProductCarousel() {
                   onClick={() => {
                       addToCart({
                           id: product.id,
-                          name: product.descrip || 'Producto sin nombre',
-                          price: `S/ ${product.precio || '0.00'}`,
-                          brand: product.marca || 'Sin marca',
-                          image: `https://ventas.vetmarket.pe/${product.imagen}`,
-                          seller: 'VetMarket',
-                          maxQuantity: 10
+                          nombre: product.descrip || product.name || 'Producto sin nombre',
+                          precio: parseFloat(product.precio || 0),
+                          marca: product.marca || product.brand || 'Sin marca',
+                          imagen: product.imagen 
+                              ? `https://ventas.vetmarket.pe/${product.imagen}`
+                              : '/placeholder-product.png'
                       });
                   }}
                   className="w-full bg-green-700 hover:bg-green-800 text-white font-bold py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors"
