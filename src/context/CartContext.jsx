@@ -69,7 +69,8 @@ export const CartProvider = ({ children }) => {
     return cartItems
       .filter(item => item.selected)
       .reduce((total, item) => {
-        const price = parseFloat(item.price.replace('S/ ', ''));
+        const priceString = item.price || '0';
+        const price = parseFloat(typeof priceString === 'string' ? priceString.replace('S/ ', '') : priceString);
         return total + (price * item.quantity);
       }, 0);
   };
@@ -82,8 +83,10 @@ export const CartProvider = ({ children }) => {
     return cartItems
       .filter(item => item.selected && item.discount)
       .reduce((total, item) => {
-        const originalPrice = parseFloat(item.originalPrice?.replace('S/ ', '') || 0);
-        const currentPrice = parseFloat(item.price.replace('S/ ', ''));
+        const originalPriceString = item.originalPrice || '0';
+        const currentPriceString = item.price || '0';
+        const originalPrice = parseFloat(typeof originalPriceString === 'string' ? originalPriceString.replace('S/ ', '') : originalPriceString);
+        const currentPrice = parseFloat(typeof currentPriceString === 'string' ? currentPriceString.replace('S/ ', '') : currentPriceString);
         const discountAmount = (originalPrice - currentPrice) * item.quantity;
         return total + discountAmount;
       }, 0);

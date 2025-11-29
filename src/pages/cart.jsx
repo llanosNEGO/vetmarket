@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
 import { Header } from '../components/Header';
-import { CategoryBar } from '../components/CategoryBar';
 import { Footer } from '../components/footer';
 import { CartItem } from '../components/CartItem';
 import { CartSummary } from '../components/CartSummary';
@@ -13,7 +12,6 @@ export const Cart = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      <CategoryBar />
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Breadcrumb */}
         <nav className="text-sm text-gray-600 mb-6">

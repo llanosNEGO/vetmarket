@@ -1,26 +1,50 @@
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Keyboard, Autoplay } from 'swiper/modules';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+
 
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/autoplay';
 
 export default function ProductCarousel() {
-  const [products] = useState([
-    { id: 1, brand: "ROYAL CANIN", name: "Royal Canin BHN Bulldog ADULT CD x 3 kg", price: "S/ 160.00", image: "/images/004187-.jpg" },
-    { id: 2, brand: "ROYAL CANIN", name: "Royal Canin BHN FR Bulldog ADULT CD bolsa x 9kg", price: "S/ 0.00", image: "/images/004186-.jpg" },
-    { id: 3, brand: "BIOFRESH", name: "BIOFRESH GATO Adulto Salmon bolsa x 1.5 kg", price: "S/ 70.00", image: "/images/004332-.jpg" },
-    { id: 4, brand: "BIOFRESH", name: "BIOFRESH GATITO Pollo bolsa x 1.5 kg", price: "S/ 75.00", image: "/images/Biofresh-Pollo-1-5-kg-Gatito.webp" },
-    { id: 5, brand: "ROYAL CANIN", name: "Royal Canin CCN MINI LIGHT WCARE Dog bolsa x 3kg", price: "S/ 175.00", image: "/images/AP001522-1.webp" },
-    { id: 6, brand: "ROYAL CANIN", name: "Royal Canin Maxi Puppy x 15 kg", price: "S/ 320.00", image: "/images/royal-canin-maxi-puppy-x-15-kg.jpg" },
-    { id: 7, brand: "ROYAL CANIN", name: "Royal Canin BHN Bulldog ADULT CD x 3 kg", price: "S/ 160.00", image: "/images/004187-.jpg" },
-    { id: 8, brand: "ROYAL CANIN", name: "Royal Canin BHN FR Bulldog ADULT CD bolsa x 9kg", price: "S/ 0.00", image: "/images/004186-.jpg" },
-    { id: 9, brand: "BIOFRESH", name: "BIOFRESH GATO Adulto Salmon bolsa x 1.5 kg", price: "S/ 70.00", image: "/images/004332-.jpg" },
-    { id: 10, brand: "BIOFRESH", name: "BIOFRESH GATITO Pollo bolsa x 1.5 kg", price: "S/ 75.00", image: "/images/Biofresh-Pollo-1-5-kg-Gatito.webp" },
-  ]);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
   const { addToCart } = useCart();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await axios.get('https://ventas.vetmarket.pe/data/productos.php');
+        setProducts(response.data);
+      } catch (error) {
+        console.error('Error al cargar productos:', error);
+        setProducts([
+          { id: 1, marca: "ROYAL CANIN", descrip: "Royal Canin BHN Bulldog ADULT CD x 3 kg", precio: "160.00", imagen: "views/php/images/productos/004187-.jpg" },
+          { id: 2, marca: "BIOFRESH", descrip: "BIOFRESH GATO Adulto Salmon bolsa x 1.5 kg", precio: "70.00", imagen: "views/php/images/productos/004332-.jpg" },
+        ]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="w-full max-w-[1610px] mx-auto py-10 px-4 md:px-12">
+        <h1 className="text-center text-2xl font-bold mb-8 text-black">Productos recientes</h1>
+        <div className="text-center py-20">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-green-700"></div>
+          <p className="mt-4 text-gray-600">Cargando productos...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-[1610px] mx-auto py-10 px-4 md:px-12 relative">
@@ -35,9 +59,9 @@ export default function ProductCarousel() {
         }}
         keyboard={true}
         autoplay={{
-          delay: 3000, // 3 segundos entre cada slide
-          disableOnInteraction: false, // Continúa después de la interacción del usuario
-          pauseOnMouseEnter: true, // Pausa cuando el mouse está sobre el carousel
+          delay: 3000, 
+          disableOnInteraction: false, 
+          pauseOnMouseEnter: true, 
         }}
         modules={[Navigation, Keyboard, Autoplay]}
         // Breakpoints para responsividad
@@ -53,28 +77,39 @@ export default function ProductCarousel() {
         {products.map((product) => (
           <SwiperSlide key={product.id} className="h-auto">
             <div className="border border-gray-200 rounded-2xl p-4 flex flex-col justify-between h-full hover:shadow-lg transition-shadow duration-300 bg-white">
-              
-              {/* Imagen */}
-              <div className="w-full h-40 mb-4 flex items-center justify-center">
-                <img src={product.image} alt={product.name} className="max-h-full max-w-full object-contain"/>
+              <div 
+                className="w-full h-40 mb-4 flex items-center justify-center cursor-pointer"
+                onClick={() => navigate(`/product/${product.id}`)}
+              >
+                <img 
+                  src={`https://ventas.vetmarket.pe/${product.imagen || product.image}`}
+                  alt={product.descrip || product.name} 
+                  className="max-h-full max-w-full object-contain"
+                  onError={(e) => { e.target.src = '/images/slide-1.svg'; }}
+                />
               </div>
-
-              {/* Info */}
-              <div className="flex flex-col flex-grow">
-                <span className="text-xs text-gray-500 uppercase font-medium mb-1">{product.brand}</span>
-                <h3 className="text-sm font-bold text-gray-800 leading-tight mb-3 line-clamp-2 min-h-[2.5rem]">{product.name}</h3>
-                <div className="text-lg font-extrabold text-green-600 mb-4">{product.price}</div>
+              <div 
+                className="flex flex-col flex-grow cursor-pointer"
+                onClick={() => navigate(`/product/${product.id}`)}
+              >
+                <span className="text-xs text-gray-500 uppercase font-medium mb-1">
+                  {product.marca || 'Sin marca'}
+                </span>
+                <h3 className="text-sm font-bold text-gray-800 leading-tight mb-3 line-clamp-2 min-h-[2.5rem] hover:text-teal-600 transition-colors">
+                  {product.descrip || product.name || 'Producto sin nombre'}
+                </h3>
+                <div className="text-lg font-extrabold text-green-600 mb-4">
+                  S/ {product.precio || '0.00'}
+                </div>
               </div>
-
-              {/* Botón */}
               <button 
                   onClick={() => {
                       addToCart({
                           id: product.id,
-                          name: product.name,
-                          price: product.price,
-                          brand: product.brand,
-                          image: product.image,
+                          name: product.descrip || 'Producto sin nombre',
+                          price: `S/ ${product.precio || '0.00'}`,
+                          brand: product.marca || 'Sin marca',
+                          image: `https://ventas.vetmarket.pe/${product.imagen}`,
                           seller: 'VetMarket',
                           maxQuantity: 10
                       });
