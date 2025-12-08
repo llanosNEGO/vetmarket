@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { userService } from "../services/api";
 
 export const Welcome = () => {
@@ -76,14 +76,17 @@ export const Welcome = () => {
             {/* Header */}
             <header className="bg-white shadow-sm">
                 <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-                    <div className="flex items-center space-x-4">
-                        <img 
-                            src="/images/logo_vetmarketpe.svg" 
-                            alt="VetMarketPE" 
-                            className="h-12 w-auto"
-                        />
-                        <h1 className="text-2xl font-bold text-gray-900">Panel de Usuario</h1>
+                    <Link to="/">
+                         <div className="flex items-center space-x-4">
+                            <img 
+                                src="/images/logo_vetmarketpe.svg" 
+                                alt="VetMarketPE" 
+                                className="h-12 w-auto"
+                            />
+                        <h1 className="text-2xl font-bold text-gray-900">Usuario</h1>
                     </div>
+                    </Link>
+                   
                     <button
                         onClick={handleLogout}
                         className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md transition-colors"

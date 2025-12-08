@@ -73,12 +73,6 @@ export const Login = () => {
                 <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
                     Iniciar sesión en tu cuenta
                 </h2>
-                <p className="mt-2 text-center text-sm text-gray-600">
-                    O{" "}
-                    <a href="#" className="font-medium text-[var(--primary)] hover:text-[var(--primary-dark)]">
-                        regístrate como nuevo cliente
-                    </a>
-                </p>
             </div>
 
             <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
@@ -215,14 +209,14 @@ export const Login = () => {
                         </div>
                     </form>
 
-                    <div className="mt-6 text-center">
+                    {/* <div className="mt-6 text-center">
                         <p className="text-sm text-gray-600">
                             ¿No tienes una cuenta?{" "}
                             <Link to="/register" className="font-medium text-[var(--primary)] hover:text-[var(--primary-dark)]">
                                 Regístrate aquí
                             </Link>
                         </p>
-                    </div>
+                    </div> */}
                 </div>
             </div>
         </div>
