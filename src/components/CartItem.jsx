@@ -22,19 +22,26 @@ export const CartItem = ({ item }) => {
 
       {/* Imagen */}
       <img
-        src={item.image || '/images/slide-1.svg'}
-        alt={item.name}
+        src={
+          item.imagen || item.image
+            ? (item.imagen?.startsWith('http') ? item.imagen : `https://ventas.vetmarket.pe/${item.imagen || item.image}`)
+            : '/placeholder-product.png'
+        }
+        alt={item.nombre || item.name}
         className="w-24 h-24 object-contain rounded-lg border border-gray-200"
+        onError={(e) => {
+          e.target.src = '/placeholder-product.png';
+        }}
       />
 
       {/* Información del producto */}
       <div className="flex-1 min-w-0">
-        <h3 className="text-sm font-semibold text-gray-800 mb-1">{item.name}</h3>
-        <p className="text-xs text-gray-500 mb-1">Marca: {item.brand}</p>
+        <h3 className="text-sm font-semibold text-gray-800 mb-1">{item.nombre || item.name}</h3>
+        <p className="text-xs text-gray-500 mb-1">Marca: {item.marca || item.brand || 'N/A'}</p>
         <p className="text-xs text-gray-500 mb-2">Vendido por: {item.seller || 'VetMarket'}</p>
 
         <div className="flex items-center gap-3">
-          <span className="text-lg font-bold text-gray-900">{item.price}</span>
+          <span className="text-lg font-bold text-gray-900">S/ {parseFloat(item.precio || item.price || 0).toFixed(2)}</span>
           {item.originalPrice && (
             <span className="text-sm text-gray-400 line-through">{item.originalPrice}</span>
           )}
