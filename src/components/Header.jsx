@@ -1,17 +1,27 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useCart } from '../context/CartContext';
+import { useAuth } from "../context/AuthContext.jsx";
 
 export const Header = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const { getCartCount } = useCart();
+    const { user, logout } = useAuth();
+    const navigate = useNavigate();
 
     const handleSearch = (e) => {
         e.preventDefault();
         console.log("Buscar:", searchQuery);
         // Aquí puedes navegar o ejecutar la búsqueda real
     };
+
+    const handleLogout = () => {
+        logout();
+        navigate('/');
+    };
+
+    const userInitial = user?.names?.charAt(0)?.toUpperCase() || user?.email?.charAt(0)?.toUpperCase();
 
     return (
         <header className="w-full bg-white shadow-md">
@@ -48,11 +58,29 @@ export const Header = () => {
                     </div>
 
                     <div className="hidden md:flex md:items-center md:space-x-4">
-                        <Link to="/login" className="flex items-center space-x-1 text-gray-700 hover:text-[var(--primary)] transition-colors">
-                            <img src="/images/usuario.svg" alt="User" className="h-7" />
-                            <span className="font-medium">Mi cuenta</span>
-                        </Link>
-                        
+                        {user ? (
+                            <div className="flex items-center space-x-3">
+                                <div className="hidden sm:flex flex-col items-end leading-tight">
+                                    <span className="text-sm font-semibold text-gray-700">{user.names || 'Usuario'}</span>
+                                    <span className="text-xs text-gray-500">{user.email}</span>
+                                </div>
+                                <div className="h-10 w-10 flex items-center justify-center rounded-full bg-[var(--primary)] text-white font-semibold">
+                                    {userInitial || 'U'}
+                                </div>
+                                <button
+                                    onClick={handleLogout}
+                                    className="px-3 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600 rounded-md transition-colors"
+                                >
+                                    Cerrar Sesión
+                                </button>
+                            </div>
+                        ) : (
+                            <Link to="/login" className="flex items-center space-x-1 text-gray-700 hover:text-[var(--primary)] transition-colors">
+                                <img src="/images/usuario.svg" alt="User" className="h-7" />
+                                <span className="font-medium">Mi cuenta</span>
+                            </Link>
+                        )}
+
                         <Link to="/cart" className="text-gray-700 relative">
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -120,10 +148,30 @@ export const Header = () => {
                     <a href="#" className="block px-4 py-3 text-gray-700 hover:bg-gray-50 font-medium">Servicios</a>
                     <a href="#" className="block px-4 py-3 text-gray-700 hover:bg-gray-50 font-medium">Contacto</a>
                     <div className="border-t border-gray-200 mt-2 pt-2">
-                        <a href="/login" className="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 font-medium">
-                            <img src="/images/usuario.svg" alt="User" className="h-5 w-5 mr-2" />
-                            Mi cuenta
-                        </a>
+                        {user ? (
+                            <>
+                                <div className="flex items-center px-4 py-3 text-gray-700 font-medium">
+                                    <div className="h-8 w-8 flex items-center justify-center rounded-full bg-[var(--primary)] text-white font-semibold mr-3">
+                                        {userInitial || 'U'}
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-semibold">{user.names || 'Usuario'}</p>
+                                        <p className="text-xs text-gray-500">{user.email}</p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={handleLogout}
+                                    className="w-full text-left px-4 py-3 text-red-600 hover:bg-red-50 font-medium"
+                                >
+                                    Cerrar Sesión
+                                </button>
+                            </>
+                        ) : (
+                            <Link to="/login" className="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 font-medium">
+                                <img src="/images/usuario.svg" alt="User" className="h-5 w-5 mr-2" />
+                                Mi cuenta
+                            </Link>
+                        )}
                     </div>
                 </div>
             )}

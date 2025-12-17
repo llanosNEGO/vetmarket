@@ -12,6 +12,8 @@ const api = axios.create({
 export const authService = {
   login: (email, password) => 
     api.post('/auth/login', { email, password }),
+  loginWithGoogle: (accessToken, profile) =>
+    api.post('/auth/google', { accessToken, profile }),
 };
 
 export const userService = {
