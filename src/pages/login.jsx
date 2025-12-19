@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useGoogleLogin } from "@react-oauth/google";
 import { authService } from "../services/api";
+import { useAuth } from "../context/AuthContext.jsx";
 
 export const Login = () => {
     const [email, setEmail] = useState("");
@@ -8,6 +10,61 @@ export const Login = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
     const navigate = useNavigate();
+    const { user, login: setAuthenticatedUser } = useAuth();
+
+    useEffect(() => {
+        if (user) {
+            navigate("/");
+        }
+    }, [user, navigate]);
+
+    const googleLogin = useGoogleLogin({
+        scope: "openid profile email",
+        onSuccess: async (tokenResponse) => {
+            try {
+                const userInfoResponse = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+                    headers: {
+                        Authorization: `Bearer ${tokenResponse.access_token}`,
+                    },
+                });
+
+                if (!userInfoResponse.ok) {
+                    throw new Error("No se pudo obtener la información del perfil de Google");
+                }
+
+                const profile = await userInfoResponse.json();
+                let userData = {
+                    id: profile.sub,
+                    names: profile.name,
+                    email: profile.email,
+                    avatar: profile.picture,
+                    provider: "google",
+                };
+
+                try {
+                    const response = await authService.loginWithGoogle(tokenResponse.access_token, profile);
+                    if (response?.data?.success && response?.data?.user) {
+                        userData = response.data.user;
+                    }
+                } catch (apiError) {
+                    console.warn("Endpoint /auth/google no disponible, usando datos de Google", apiError);
+                }
+
+                setAuthenticatedUser(userData);
+                navigate("/");
+            } catch (err) {
+                console.error("Error en login con Google:", err);
+                setError("No se pudo iniciar sesión con Google");
+            } finally {
+                setIsLoading(false);
+            }
+        },
+        onError: (errorResponse) => {
+            console.error("Google OAuth error:", errorResponse);
+            setError("No se pudo iniciar sesión con Google");
+            setIsLoading(false);
+        },
+    });
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -18,13 +75,8 @@ export const Login = () => {
             const response = await authService.login(email, password);
             
             if (response.data.success) {
-                console.log("Login exitoso:", response.data.user);
-                
-                // Guardar información del usuario en localStorage
-                localStorage.setItem('user', JSON.stringify(response.data.user));
-                
-                // Redirigir al dashboard o página principal
-                navigate("/welcome");
+                setAuthenticatedUser(response.data.user);
+                navigate("/");
             }
         } catch (err) {
             console.error("Error en login:", err);
@@ -35,15 +87,16 @@ export const Login = () => {
     };
 
     const handleGoogleLogin = () => {
-        setIsLoading(true);
         setError("");
-        // Lógica para login con Google
-        console.log("Google login");
-        // Aquí puedes integrar con tu backend para login con Google
-        setTimeout(() => {
+        setIsLoading(true);
+
+        try {
+            googleLogin();
+        } catch (err) {
+            console.error("Error iniciando Google OAuth:", err);
+            setError("No se pudo iniciar sesión con Google");
             setIsLoading(false);
-            setError("Login con Google no implementado aún");
-        }, 1500);
+        }
     };
 
     const handleFacebookLogin = () => {
