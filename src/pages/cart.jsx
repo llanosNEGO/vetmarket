@@ -1,10 +1,10 @@
 import { Link } from 'react-router-dom';
-import { Header } from '../components/Header';
-import { Footer } from '../components/footer';
-import { CartItem } from '../components/CartItem';
-import { CartSummary } from '../components/CartSummary';
-import { CartSidebar } from '../components/CartSidebar';
 import { useCart } from '../context/CartContext';
+import { Footer } from '../components/Principales/footer';
+import { Header } from '../components/Principales/Header';
+import { CartItem } from '../components/cart/CartItem';
+import { CartSidebar } from '../components/cart/CartSidebar';
+import { CartSummary } from '../components/cart/CartSummary';
 
 export const Cart = () => {
   const { cartItems } = useCart();
@@ -48,7 +48,6 @@ export const Cart = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Columna izquierda - Lista de productos */}
             <div className="lg:col-span-2">
               <CartSidebar />
               <div className="bg-white rounded-lg shadow-sm">
@@ -58,7 +57,6 @@ export const Cart = () => {
               </div>
             </div>
 
-            {/* Columna derecha - Resumen */}
             <div className="lg:col-span-1">
               <CartSummary />
             </div>

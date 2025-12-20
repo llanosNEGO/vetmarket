@@ -1,10 +1,10 @@
-import { Header } from '../components/Header';
-import  {CategoryBar}  from '../components/CategoryBar';
-import CarouselBar from '../components/CarouselBar';
+import CarouselBar from '../components/Principales/CarouselBar';
 import ProductCarousel from '../components/ProductCarousel';
-import { Footer } from '../components/footer';
-import { CategoryPopulation } from '../components/CategoryPopulation';
+import { CategoryPopulation } from '../components/Categorias/CategoryPopulation';
 import { SupportCenter } from '../components/SupportCenter';
+import { Header } from '../components/Principales/Header';
+import { CategoryBar } from '../components/Categorias/CategoryBar';
+import { Footer } from '../components/Principales/footer';
 
 export const Home = () => {
     return (

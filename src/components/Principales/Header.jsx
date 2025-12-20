@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useCart } from '../context/CartContext';
-import { useAuth } from "../context/AuthContext.jsx";
+
+import { useAuth } from "../../context/AuthContext.jsx";
+import { useCart } from "../../context/CartContext.jsx";
 
 export const Header = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -32,8 +33,8 @@ export const Header = () => {
                     </div>
 
                     <div className="hidden md:flex md:items-center md:space-x-6">
-                        <a href="#" className="px-4 py-2 text-[var(--primary)] font-medium hover:text-[var(--primary-dark)] transition-colors">Inicio</a>
-                        <a href="#" className="px-4 py-2 text-[var(--primary)] font-medium hover:text-[var(--primary-dark)] transition-colors">Quiénes Somos</a>
+                        <a href="/" className="px-4 py-2 text-[var(--primary)] font-medium hover:text-[var(--primary-dark)] transition-colors">Inicio</a>
+                        <a href="/" className="px-4 py-2 text-[var(--primary)] font-medium hover:text-[var(--primary-dark)] transition-colors">Quiénes Somos</a>
                     </div>
 
                     <div className="hidden md:flex md:items-center md:flex-1 md:justify-center md:mx-8">

@@ -21,7 +21,7 @@ export const AppRouter = () => {
                 <Route path="/categoria/:categoryName" element={<CategoryProducts />} />  
                 <Route path="/product/:id" element={<ProductDetail />} />
                 <Route path='/checkout' element={<Checkout />} />
-                <Route path='/pedidos/confirmado/:id' element={<PedidoConfirmado />} />
+                <Route path='/pedidos-confirmado/:id' element={<PedidoConfirmado />} />
             </Routes>
         </BrowserRouter>
     )
