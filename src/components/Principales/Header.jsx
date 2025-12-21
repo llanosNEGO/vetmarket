@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 
 import { useAuth } from "../../context/AuthContext.jsx";
 import { useCart } from "../../context/CartContext.jsx";
@@ -10,11 +10,17 @@ export const Header = () => {
     const { getCartCount } = useCart();
     const { user, logout } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
 
     const handleSearch = (e) => {
         e.preventDefault();
-        console.log("Buscar:", searchQuery);
-        // Aquí puedes navegar o ejecutar la búsqueda real
+        const trimmedQuery = searchQuery.trim();
+        if (!trimmedQuery) {
+            return;
+        }
+
+        navigate(`/buscar?query=${encodeURIComponent(trimmedQuery)}`);
+        setIsMenuOpen(false);
     };
 
     const handleLogout = () => {
@@ -23,6 +29,19 @@ export const Header = () => {
     };
 
     const userInitial = user?.names?.charAt(0)?.toUpperCase() || user?.email?.charAt(0)?.toUpperCase();
+
+    useEffect(() => {
+        try {
+            const searchValue = typeof location.search === 'string' ? location.search : '';
+            const params = new URLSearchParams(searchValue || '');
+            const queryParam = params.get('query') || '';
+
+            setSearchQuery((current) => (current === queryParam ? current : queryParam));
+        } catch (err) {
+            console.warn('No se pudo procesar el parámetro de búsqueda:', err);
+            setSearchQuery('');
+        }
+    }, [location.search]);
 
     return (
         <header className="w-full bg-white shadow-md">

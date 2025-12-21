@@ -8,12 +8,23 @@ import { CategoryBar } from '../components/Categorias/CategoryBar';
 
 
 export const CategoryProducts = () => {
-    const { categoryName } = useParams();
+    const { categoryId, categoryName } = useParams();
     const navigate = useNavigate();
     const { addToCart } = useCart();
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+
+    const decodeParam = useCallback((value) => {
+        if (!value) return '';
+
+        try {
+            return decodeURIComponent(value);
+        } catch (decodeError) {
+            console.warn('No se pudo decodificar el parámetro:', value, decodeError);
+            return value;
+        }
+    }, []);
 
     // Función recursiva para obtener todos los IDs de subcategorías
     const getAllSubcategoryIds = useCallback((category) => {
@@ -39,12 +50,18 @@ export const CategoryProducts = () => {
                 const categories = categoriesResponse.data.value || categoriesResponse.data;
 
                 console.log("Todas las categorías:", categories);
-                console.log("Buscando categoría:", categoryName);
+                const decodedCategoryName = decodeParam(categoryName);
+
+                console.log("Buscando categoría:", decodedCategoryName, "(ID:", categoryId, ")");
 
                 // Buscar la categoría actual por nombre
-                const currentCategory = categories.find(
-                    (cat) => cat.nom.toLowerCase() === decodeURIComponent(categoryName).toLowerCase()
-                );
+                const currentCategory = categories.find((cat) => {
+                    const matchesId = categoryId ? String(cat.id) === String(categoryId) : false;
+                    const matchesName = decodedCategoryName
+                        ? cat.nom.toLowerCase() === decodedCategoryName.toLowerCase()
+                        : false;
+                    return matchesId || matchesName;
+                });
 
                 console.log("Categoría encontrada:", currentCategory);
 
@@ -102,7 +119,7 @@ export const CategoryProducts = () => {
         };
 
         fetchProducts();
-    }, [categoryName, getAllSubcategoryIds]);
+    }, [categoryId, categoryName, decodeParam, getAllSubcategoryIds]);
 
     const handleProductClick = (productId) => {
         navigate(`/product/${productId}`);
@@ -137,12 +154,12 @@ export const CategoryProducts = () => {
                     </a>
                     <span className="text-gray-400">&gt;</span>
                     <span className="text-gray-900 font-medium capitalize">
-                        {categoryName}
+                        {decodeParam(categoryName) || 'Categoría'}
                     </span>
                 </nav>
 
                 <h1 className="text-3xl font-bold text-gray-900 mb-8 uppercase">
-                    {categoryName}
+                    {decodeParam(categoryName) || 'Categoría'}
                 </h1>
 
                 {/* Loading */}
