@@ -122,24 +122,17 @@ export const Checkout = () => {
     try {
       const userData = JSON.parse(localStorage.getItem('user') || '{}');
       
-      console.log('=== DEBUG USER DATA ===');
-      console.log('userData:', userData);
-      console.log('userData.id:', userData.id);
-      console.log('Type of userData.id:', typeof userData.id);
-      
       if (!userData.id) {
         alert('Debes iniciar sesión para realizar un pedido');
         navigate('/login');
         return;
       }
 
-      // Preparar dirección completa
       let direccionCompleta = formData.direccion;
       if (formData.ciudad) direccionCompleta += `, ${formData.ciudad}`;
       if (formData.distrito) direccionCompleta += `, ${formData.distrito}`;
       if (formData.referencia) direccionCompleta += ` (Referencia: ${formData.referencia})`;
 
-      // Preparar datos del pedido (sin el comprobante en Base64)
       const pedidoData = {
         id_cliente: userData.id,
         cliente_nombre: formData.nombres.trim(),
@@ -152,13 +145,11 @@ export const Checkout = () => {
         telefono_contacto: formData.telefono,
         notas: formData.notas || '',
         estado: 'pendiente',
-        // Información de pago (sin comprobanteBase64 aquí)
         metodo_pago: paymentData.metodoPago,
         numero_operacion: paymentData.numeroOperacion || null,
         nombre_comprobante: paymentData.comprobanteNombre || null,
         fecha_pago: paymentData.fechaPago || null,
         estado_pago: paymentData.metodoPago === 'efectivo' ? 'pendiente' : 'por_verificar',
-        // Detalles del pedido
         detalles: selectedItems.map(item => {
           const precioUnitario = parsePrice(item.precio);
           const subtotalLinea = precioUnitario * item.quantity;
@@ -177,35 +168,15 @@ export const Checkout = () => {
         })
       };
 
-      console.log('=== DEBUG PEDIDO DATA ===');
-      console.log('pedidoData completo:', pedidoData);
-      console.log('pedidoData.id_cliente:', pedidoData.id_cliente);
-      console.log('Tipo de pedidoData.id_cliente:', typeof pedidoData.id_cliente);
-
-      console.log('Preparando envío del pedido con FormData...');
-
-      // Crear FormData para enviar
       const formDataToSend = new FormData();
       
-      // Agregar datos del pedido como JSON
       const pedidoDataJSON = JSON.stringify(pedidoData);
       formDataToSend.append('pedidoData', pedidoDataJSON);
       
-      console.log('=== DEBUG FORMDATA ===');
-      console.log('pedidoDataJSON:', pedidoDataJSON);
-      console.log('¿Contiene id_cliente?:', pedidoDataJSON.includes('"id_cliente":'));
       
-      // Verificar contenido del FormData
-      for (let pair of formDataToSend.entries()) {
-        console.log(pair[0], ':', typeof pair[1], pair[1]);
-      }
-      
-      // Agregar archivo del comprobante si existe
       if (paymentData.comprobanteArchivo) {
         formDataToSend.append('comprobante', paymentData.comprobanteArchivo);
-        console.log('Comprobante archivo agregado');
       } else if (paymentData.comprobanteBase64 && paymentData.comprobanteBase64.startsWith('data:')) {
-        // Si aún viene en Base64 (para compatibilidad), convertirlo a Blob
         const base64Data = paymentData.comprobanteBase64.split(',')[1];
         const mimeType = paymentData.comprobanteBase64.split(',')[0].split(':')[1].split(';')[0];
         const byteCharacters = atob(base64Data);
@@ -226,21 +197,15 @@ export const Checkout = () => {
         const blob = new Blob(byteArrays, { type: mimeType });
         const file = new File([blob], paymentData.comprobanteNombre || 'comprobante.jpg', { type: mimeType });
         formDataToSend.append('comprobante', file);
-        console.log('Comprobante base64 convertido y agregado');
       }
-
-      console.log('Enviando a:', 'http://localhost:3000/api/pedidos');
 
       // Enviar con FormData
       const response = await fetch('http://localhost:3000/api/pedidos', {
         method: 'POST',
-        // NO agregar Content-Type header cuando usas FormData
-        // El navegador lo establece automáticamente con el boundary correcto
         body: formDataToSend
       });
 
       const result = await response.json();
-      console.log('Respuesta del backend:', result);
 
       if (!response.ok) {
         throw new Error(result.error || `Error HTTP: ${response.status}`);
@@ -290,9 +255,7 @@ export const Checkout = () => {
       }
 
     } catch (error) {
-      console.error('Error al procesar pedido:', error);
       alert(`Error al procesar el pedido: ${error.message}\nPor favor intenta nuevamente.`);
-      // Reabrir modal en caso de error
       setShowPaymentModal(true);
     } finally {
       setLoading(false);
@@ -349,7 +312,8 @@ export const Checkout = () => {
                     value={formData.nombres}
                     onChange={handleInputChange}
                     required
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                    className="w-full border bg-[var(--bg-cajas)] text-[var(--secondary)] border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-[var(--primary)]-500"
+                    style={{ color: 'var(--secondary) !important'}}
                   />
                 </div>
               </div>
@@ -367,7 +331,8 @@ export const Checkout = () => {
                     required
                     pattern="[0-9]{8}"
                     title="El DNI debe tener 8 dígitos"
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                    className="w-full border bg-[var(--bg-cajas)] text-[var(--secondary)] border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-[var(--primary)]-500"
+                    style={{ color: 'var(--secondary) !important'}}
                   />
                 </div>
                 <div>
@@ -382,7 +347,8 @@ export const Checkout = () => {
                     required
                     pattern="[0-9]{9}"
                     title="El teléfono debe tener 9 dígitos"
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                    className="w-full border bg-[var(--bg-cajas)] text-[var(--secondary)] border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-[var(--primary)]-500"
+                    style={{ color: 'var(--secondary) !important'}}
                   />
                 </div>
               </div>
@@ -397,7 +363,8 @@ export const Checkout = () => {
                   value={formData.email}
                   onChange={handleInputChange}
                   required
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                  className="w-full border bg-[var(--bg-cajas)] text-[var(--secondary)] border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-[var(--primary)]-500"
+                  style={{ color: 'var(--secondary) !important'}}
                 />
               </div>
 
@@ -412,7 +379,8 @@ export const Checkout = () => {
                   onChange={handleInputChange}
                   required
                   placeholder="Calle, número, urbanización"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                  className="w-full border bg-[var(--bg-cajas)] text-[var(--secondary)] border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-[var(--primary)]-500"
+                  style={{ color: 'var(--secondary) !important'}}
                 />
               </div>
 
@@ -427,7 +395,8 @@ export const Checkout = () => {
                     value={formData.ciudad}
                     onChange={handleInputChange}
                     required
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                    className="w-full border bg-[var(--bg-cajas)] text-[var(--secondary)] border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-[var(--primary)]-500"
+                    style={{ color: 'var(--secondary) !important'}}
                   />
                 </div>
                 <div>
@@ -440,7 +409,8 @@ export const Checkout = () => {
                     value={formData.distrito}
                     onChange={handleInputChange}
                     required
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                    className="w-full border bg-[var(--bg-cajas)] text-[var(--secondary)] border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-[var(--primary)]-500"
+                    style={{ color: 'var(--secondary) !important'}}
                   />
                 </div>
               </div>
@@ -455,7 +425,8 @@ export const Checkout = () => {
                   onChange={handleInputChange}
                   rows="2"
                   placeholder="Puntos de referencia para la entrega"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                  className="w-full border bg-[var(--bg-cajas)] text-[var(--secondary)] border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-[var(--primary)]-500"
+                  style={{ color: 'var(--secondary) !important'}}
                 />
               </div>
 
@@ -469,7 +440,8 @@ export const Checkout = () => {
                   onChange={handleInputChange}
                   rows="3"
                   placeholder="Instrucciones especiales para tu pedido..."
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                  className="w-full border bg-[var(--bg-cajas)] text-[var(--secondary)] border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-[var(--primary)]-500"
+                  style={{ color: 'var(--secondary) !important'}}
                 />
               </div>
 
@@ -500,7 +472,6 @@ export const Checkout = () => {
             </form>
           </div>
 
-          {/* Resumen del pedido */}
           <div className="bg-white rounded-lg shadow-sm p-6 h-fit sticky top-4">
             <h2 className="text-xl font-bold text-gray-800 mb-6">Resumen del pedido</h2>
             
@@ -578,7 +549,6 @@ export const Checkout = () => {
       </div>
       <Footer />
 
-      {/* Modal de Pago */}
       <PaymentModal
         isOpen={showPaymentModal}
         onClose={() => setShowPaymentModal(false)}
