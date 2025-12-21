@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Header } from '../components/Header';
-import { Footer } from '../components/footer';
-import { CategoryBar } from '../components/CategoryBar';
 import { useCart } from '../context/CartContext';
+import { Header } from '../components/Principales/Header';
+import { Footer } from '../components/Principales/footer';
+import { CategoryBar } from '../components/Categorias/CategoryBar';
+
 
 export const CategoryProducts = () => {
     const { categoryName } = useParams();

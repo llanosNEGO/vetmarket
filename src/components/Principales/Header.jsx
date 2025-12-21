@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useCart } from '../context/CartContext';
-import { useAuth } from "../context/AuthContext.jsx";
+
+import { useAuth } from "../../context/AuthContext.jsx";
+import { useCart } from "../../context/CartContext.jsx";
 
 export const Header = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -32,8 +33,8 @@ export const Header = () => {
                     </div>
 
                     <div className="hidden md:flex md:items-center md:space-x-6">
-                        <a href="#" className="px-4 py-2 text-[var(--primary)] font-medium hover:text-[var(--primary-dark)] transition-colors">Inicio</a>
-                        <a href="#" className="px-4 py-2 text-[var(--primary)] font-medium hover:text-[var(--primary-dark)] transition-colors">Quiénes Somos</a>
+                        <a href="/" className="px-4 py-2 text-[var(--primary)] font-medium hover:text-[var(--primary-dark)] transition-colors">Inicio</a>
+                        <a href="/" className="px-4 py-2 text-[var(--primary)] font-medium hover:text-[var(--primary-dark)] transition-colors">Quiénes Somos</a>
                     </div>
 
                     <div className="hidden md:flex md:items-center md:flex-1 md:justify-center md:mx-8">
@@ -64,6 +65,17 @@ export const Header = () => {
                                     <span className="text-sm font-semibold text-gray-700">{user.names || 'Usuario'}</span>
                                     <span className="text-xs text-gray-500">{user.email}</span>
                                 </div>
+                                
+                                <Link
+                                    to="/historial"
+                                    className="px-3 py-2 text-sm font-medium text-[var(--primary)] hover:text-[var(--primary-dark)] transition-colors flex items-center"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                    </svg>
+                                    Mis Pedidos
+                                </Link>
+
                                 <div className="h-10 w-10 flex items-center justify-center rounded-full bg-[var(--primary)] text-white font-semibold">
                                     {userInitial || 'U'}
                                 </div>
@@ -147,6 +159,20 @@ export const Header = () => {
                     <a href="#" className="block px-4 py-3 text-gray-700 hover:bg-gray-50 font-medium">Productos</a>
                     <a href="#" className="block px-4 py-3 text-gray-700 hover:bg-gray-50 font-medium">Servicios</a>
                     <a href="#" className="block px-4 py-3 text-gray-700 hover:bg-gray-50 font-medium">Contacto</a>
+                    
+                    {user && (
+                        <Link 
+                            to="/historial" 
+                            className="block px-4 py-3 text-gray-700 hover:bg-gray-50 font-medium items-center"
+                            onClick={() => setIsMenuOpen(false)}
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                            </svg>
+                            Mis Pedidos
+                        </Link>
+                    )}
+                    
                     <div className="border-t border-gray-200 mt-2 pt-2">
                         {user ? (
                             <>

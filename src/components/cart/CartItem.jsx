@@ -1,5 +1,5 @@
 import { Trash2 } from 'lucide-react';
-import { useCart } from '../context/CartContext';
+import { useCart } from '../../context/CartContext';
 
 export const CartItem = ({ item }) => {
   const { updateQuantity, removeFromCart, toggleItemSelection } = useCart();

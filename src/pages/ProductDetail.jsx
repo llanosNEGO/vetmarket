@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Header } from '../components/Header';
-import { CategoryBar } from '../components/CategoryBar';
-import { Footer } from '../components/footer';
 import { useCart } from '../context/CartContext';
 import axios from 'axios';
 import { ShoppingCart } from 'lucide-react';
+import { CategoryBar } from '../components/Categorias/CategoryBar';
+import { Header } from '../components/Principales/Header';
+import { Footer } from '../components/Principales/footer';
 
 export const ProductDetail = () => {
   const { id } = useParams();

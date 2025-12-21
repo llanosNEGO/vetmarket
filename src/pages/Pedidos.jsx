@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Header } from '../components/Header';
-import { Footer } from '../components/footer';
 import { useCart } from '../context/CartContext';
+import { Header } from '../components/Principales/Header';
+import { Footer } from '../components/Principales/footer';
+import { PaymentModal } from '../components/pedido/PagosModal';
 
 export const Checkout = () => {
   const { cartItems, getCartTotal, getDiscount, clearCart } = useCart();
@@ -10,7 +11,6 @@ export const Checkout = () => {
   
   const [formData, setFormData] = useState({
     nombres: '',
-    apellidos: '',
     dni: '',
     telefono: '',
     email: '',
@@ -22,6 +22,8 @@ export const Checkout = () => {
   });
 
   const [loading, setLoading] = useState(false);
+  const [pedidoProcesado, setPedidoProcesado] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   const selectedItems = cartItems.filter(item => item.selected);
   const subtotal = getCartTotal();
@@ -29,12 +31,10 @@ export const Checkout = () => {
   const total = subtotal - discount;
 
   useEffect(() => {
-    // Si no hay productos seleccionados, redirigir al carrito
-    if (selectedItems.length === 0) {
+    if (selectedItems.length === 0 && !pedidoProcesado) {
       navigate('/cart');
     }
 
-    // Cargar datos del usuario si está logueado
     const userData = JSON.parse(localStorage.getItem('user') || '{}');
     if (userData.id) {
       setFormData(prev => ({
@@ -45,7 +45,7 @@ export const Checkout = () => {
         dni: userData.dni || ''
       }));
     }
-  }, [navigate, selectedItems.length]);
+  }, [navigate, selectedItems.length, pedidoProcesado]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -55,12 +55,10 @@ export const Checkout = () => {
     }));
   };
 
-  // Función para convertir precio
   const parsePrice = (price) => {
     if (price == null) return 0;
     if (typeof price === 'number') return price;
     
-    // Eliminar símbolos, espacios y convertir coma decimal a punto
     const cleaned = String(price)
       .replace(/[^\d,.-]/g, '')
       .replace(',', '.');
@@ -68,14 +66,42 @@ export const Checkout = () => {
     return isNaN(parsed) ? 0 : parsed;
   };
 
-  const handleSubmit = async (e) => {
+  const validateForm = () => {
+    if (!formData.nombres.trim()) {
+      alert('Por favor ingresa tus nombres');
+      return false;
+    }
+    if (!formData.dni.trim() || !/^\d{8}$/.test(formData.dni)) {
+      alert('Por favor ingresa un DNI válido (8 dígitos)');
+      return false;
+    }
+    if (!formData.telefono.trim() || !/^\d{9}$/.test(formData.telefono)) {
+      alert('Por favor ingresa un teléfono válido (9 dígitos)');
+      return false;
+    }
+    if (!formData.email.trim() || !/^\S+@\S+\.\S+$/.test(formData.email)) {
+      alert('Por favor ingresa un email válido');
+      return false;
+    }
+    if (!formData.direccion.trim()) {
+      alert('Por favor ingresa tu dirección');
+      return false;
+    }
+    if (!formData.ciudad.trim()) {
+      alert('Por favor ingresa tu ciudad');
+      return false;
+    }
+    if (!formData.distrito.trim()) {
+      alert('Por favor ingresa tu distrito');
+      return false;
+    }
+    return true;
+  };
+
+  const handleFormSubmit = (e) => {
     e.preventDefault();
     
-    // Validaciones del formulario
-    if (!formData.nombres || !formData.dni || 
-        !formData.telefono || !formData.email || !formData.direccion || 
-        !formData.ciudad || !formData.distrito) {
-      alert('Por favor completa todos los campos obligatorios (*)');
+    if (!validateForm()) {
       return;
     }
 
@@ -85,7 +111,13 @@ export const Checkout = () => {
       return;
     }
 
+    // Abrir modal de pago
+    setShowPaymentModal(true);
+  };
+
+  const handlePaymentSubmit = async (paymentData) => {
     setLoading(true);
+    setShowPaymentModal(false);
 
     try {
       const userData = JSON.parse(localStorage.getItem('user') || '{}');
@@ -96,21 +128,28 @@ export const Checkout = () => {
         return;
       }
 
-      // Preparar dirección completa
       let direccionCompleta = formData.direccion;
       if (formData.ciudad) direccionCompleta += `, ${formData.ciudad}`;
       if (formData.distrito) direccionCompleta += `, ${formData.distrito}`;
       if (formData.referencia) direccionCompleta += ` (Referencia: ${formData.referencia})`;
 
-      // Preparar todos los datos en una sola estructura
-      const pedidoCompleto = {
+      const pedidoData = {
         id_cliente: userData.id,
+        cliente_nombre: formData.nombres.trim(),
+        cliente_dni: formData.dni,
+        cliente_email: formData.email,
+        cliente_telefono: formData.telefono,
         subtotal: subtotal.toFixed(2),
         total: total.toFixed(2),
         direccion_envio: direccionCompleta,
-        telefono_contacto: formData.telefono.substring(0, 20), // Limitar a 20 caracteres
+        telefono_contacto: formData.telefono,
         notas: formData.notas || '',
-        estado: 'pendiente', // Estado inicial
+        estado: 'pendiente',
+        metodo_pago: paymentData.metodoPago,
+        numero_operacion: paymentData.numeroOperacion || null,
+        nombre_comprobante: paymentData.comprobanteNombre || null,
+        fecha_pago: paymentData.fechaPago || null,
+        estado_pago: paymentData.metodoPago === 'efectivo' ? 'pendiente' : 'por_verificar',
         detalles: selectedItems.map(item => {
           const precioUnitario = parsePrice(item.precio);
           const subtotalLinea = precioUnitario * item.quantity;
@@ -120,42 +159,95 @@ export const Checkout = () => {
             cantidad: item.quantity,
             precio_unitario: precioUnitario.toFixed(2),
             subtotal_linea: subtotalLinea.toFixed(2),
+            nombre_producto: item.descrip || '',
             marca: item.marca || '',
-            descripcion: item.name || '',
-            descrip_corta: item.descrip_corta || '',
+            descripcion: item.descrip_corta || '',
             categoria: item.cat || '',
             imagen: item.imagen || ''
           };
         })
       };
 
-      console.log('Enviando pedido al backend:', pedidoCompleto);
+      const formDataToSend = new FormData();
+      
+      const pedidoDataJSON = JSON.stringify(pedidoData);
+      formDataToSend.append('pedidoData', pedidoDataJSON);
+      
+      
+      if (paymentData.comprobanteArchivo) {
+        formDataToSend.append('comprobante', paymentData.comprobanteArchivo);
+      } else if (paymentData.comprobanteBase64 && paymentData.comprobanteBase64.startsWith('data:')) {
+        const base64Data = paymentData.comprobanteBase64.split(',')[1];
+        const mimeType = paymentData.comprobanteBase64.split(',')[0].split(':')[1].split(';')[0];
+        const byteCharacters = atob(base64Data);
+        const byteArrays = [];
+        
+        for (let offset = 0; offset < byteCharacters.length; offset += 512) {
+          const slice = byteCharacters.slice(offset, offset + 512);
+          const byteNumbers = new Array(slice.length);
+          
+          for (let i = 0; i < slice.length; i++) {
+            byteNumbers[i] = slice.charCodeAt(i);
+          }
+          
+          const byteArray = new Uint8Array(byteNumbers);
+          byteArrays.push(byteArray);
+        }
+        
+        const blob = new Blob(byteArrays, { type: mimeType });
+        const file = new File([blob], paymentData.comprobanteNombre || 'comprobante.jpg', { type: mimeType });
+        formDataToSend.append('comprobante', file);
+      }
 
+      // Enviar con FormData
       const response = await fetch('http://localhost:3000/api/pedidos', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(pedidoCompleto)
+        body: formDataToSend
       });
 
       const result = await response.json();
-      console.log('Respuesta del backend:', result);
 
       if (!response.ok) {
         throw new Error(result.error || `Error HTTP: ${response.status}`);
       }
 
       if (result.success) {
-        // Limpiar solo los items seleccionados del carrito
+        setPedidoProcesado(true);
+        
+        // Guardar en localStorage para PedidoConfirmado
+        const detallesPedido = {
+          id: result.data.id_pedido,
+          total: total,
+          fecha: new Date().toLocaleDateString('es-PE'),
+          hora: new Date().toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' }),
+          productos: selectedItems,
+          direccion: direccionCompleta,
+          estado: 'pendiente',
+          metodoPago: paymentData.metodoPago,
+          numeroOperacion: paymentData.numeroOperacion
+        };
+        
+        localStorage.setItem('ultimoPedido', JSON.stringify(detallesPedido));
+        
+        // Limpiar carrito
         clearCart();
         
-        // Redirigir a confirmación con el ID del pedido
-        navigate(`/pedido-confirmado/${result.data.id_pedido}`, {
+        // Redirigir a confirmación
+        navigate(`/pedidos-confirmado/${result.data.id_pedido}`, {
           state: {
             pedidoId: result.data.id_pedido,
             total: total,
-            fecha: new Date().toLocaleDateString()
+            fecha: new Date().toLocaleDateString('es-PE'),
+            hora: new Date().toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' }),
+            productos: selectedItems,
+            direccion_envio: direccionCompleta,
+            telefono: formData.telefono,
+            notas: formData.notas,
+            estado: 'pendiente',
+            metodoPago: paymentData.metodoPago,
+            numeroOperacion: paymentData.numeroOperacion || 'N/A',
+            clienteNombre: formData.nombres.trim(),
+            clienteEmail: formData.email
           }
         });
       } else {
@@ -163,14 +255,14 @@ export const Checkout = () => {
       }
 
     } catch (error) {
-      console.error('Error al procesar pedido:', error);
       alert(`Error al procesar el pedido: ${error.message}\nPor favor intenta nuevamente.`);
+      setShowPaymentModal(true);
     } finally {
       setLoading(false);
     }
   };
 
-  if (selectedItems.length === 0) {
+  if (selectedItems.length === 0 && !pedidoProcesado) {
     return (
       <div className="min-h-screen bg-gray-50">
         <Header />
@@ -208,7 +300,7 @@ export const Checkout = () => {
           <div className="bg-white rounded-lg shadow-sm p-6">
             <h2 className="text-xl font-bold text-gray-800 mb-6">Información de envío</h2>
             
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleFormSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -220,7 +312,8 @@ export const Checkout = () => {
                     value={formData.nombres}
                     onChange={handleInputChange}
                     required
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                    className="w-full border bg-[var(--bg-cajas)] text-[var(--secondary)] border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-[var(--primary)]-500"
+                    style={{ color: 'var(--secondary) !important'}}
                   />
                 </div>
               </div>
@@ -238,7 +331,8 @@ export const Checkout = () => {
                     required
                     pattern="[0-9]{8}"
                     title="El DNI debe tener 8 dígitos"
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                    className="w-full border bg-[var(--bg-cajas)] text-[var(--secondary)] border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-[var(--primary)]-500"
+                    style={{ color: 'var(--secondary) !important'}}
                   />
                 </div>
                 <div>
@@ -253,7 +347,8 @@ export const Checkout = () => {
                     required
                     pattern="[0-9]{9}"
                     title="El teléfono debe tener 9 dígitos"
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                    className="w-full border bg-[var(--bg-cajas)] text-[var(--secondary)] border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-[var(--primary)]-500"
+                    style={{ color: 'var(--secondary) !important'}}
                   />
                 </div>
               </div>
@@ -268,7 +363,8 @@ export const Checkout = () => {
                   value={formData.email}
                   onChange={handleInputChange}
                   required
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                  className="w-full border bg-[var(--bg-cajas)] text-[var(--secondary)] border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-[var(--primary)]-500"
+                  style={{ color: 'var(--secondary) !important'}}
                 />
               </div>
 
@@ -283,7 +379,8 @@ export const Checkout = () => {
                   onChange={handleInputChange}
                   required
                   placeholder="Calle, número, urbanización"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                  className="w-full border bg-[var(--bg-cajas)] text-[var(--secondary)] border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-[var(--primary)]-500"
+                  style={{ color: 'var(--secondary) !important'}}
                 />
               </div>
 
@@ -298,7 +395,8 @@ export const Checkout = () => {
                     value={formData.ciudad}
                     onChange={handleInputChange}
                     required
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                    className="w-full border bg-[var(--bg-cajas)] text-[var(--secondary)] border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-[var(--primary)]-500"
+                    style={{ color: 'var(--secondary) !important'}}
                   />
                 </div>
                 <div>
@@ -311,7 +409,8 @@ export const Checkout = () => {
                     value={formData.distrito}
                     onChange={handleInputChange}
                     required
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                    className="w-full border bg-[var(--bg-cajas)] text-[var(--secondary)] border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-[var(--primary)]-500"
+                    style={{ color: 'var(--secondary) !important'}}
                   />
                 </div>
               </div>
@@ -326,7 +425,8 @@ export const Checkout = () => {
                   onChange={handleInputChange}
                   rows="2"
                   placeholder="Puntos de referencia para la entrega"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                  className="w-full border bg-[var(--bg-cajas)] text-[var(--secondary)] border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-[var(--primary)]-500"
+                  style={{ color: 'var(--secondary) !important'}}
                 />
               </div>
 
@@ -340,13 +440,15 @@ export const Checkout = () => {
                   onChange={handleInputChange}
                   rows="3"
                   placeholder="Instrucciones especiales para tu pedido..."
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                  className="w-full border bg-[var(--bg-cajas)] text-[var(--secondary)] border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-[var(--primary)]-500"
+                  style={{ color: 'var(--secondary) !important'}}
                 />
               </div>
 
               <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
                 <p className="text-sm text-blue-800">
-                  <strong>Nota:</strong> Al confirmar el pedido, recibirás un correo de confirmación y nuestro equipo se pondrá en contacto contigo para coordinar el pago y envío.
+                  <strong>Nota:</strong> Al confirmar el pedido, se abrirá una ventana para seleccionar el método de pago. 
+                  Puedes elegir entre transferencia bancaria, Yape/Plin o pago en efectivo.
                 </p>
               </div>
 
@@ -363,25 +465,27 @@ export const Checkout = () => {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    Procesando pedido...
+                    Procesando...
                   </>
-                ) : `Confirmar pedido - S/ ${total.toFixed(2)}`}
+                ) : `Continuar al Pago - S/ ${total.toFixed(2)}`}
               </button>
             </form>
           </div>
 
-          {/* Resumen del pedido */}
           <div className="bg-white rounded-lg shadow-sm p-6 h-fit sticky top-4">
             <h2 className="text-xl font-bold text-gray-800 mb-6">Resumen del pedido</h2>
             
             <div className="space-y-4 mb-6 max-h-96 overflow-y-auto pr-2">
               {selectedItems.map((item) => (
-                <div key={item.id} className="flex items-center space-x-3 border-b pb-4">
+                <div key={`${item.id}-${item.selected}`} className="flex items-center space-x-3 border-b pb-4">
                   <div className="w-16 h-16 flex-shrink-0">
                     <img
                       src={item.imagen || '/placeholder-product.jpg'}
                       alt={item.name}
                       className="w-full h-full object-cover rounded"
+                      onError={(e) => {
+                        e.target.src = '/placeholder-product.jpg';
+                      }}
                     />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -421,13 +525,37 @@ export const Checkout = () => {
             </div>
 
             <div className="mt-6 text-sm text-gray-600">
-              <p className="mb-2">Productos en el pedido: {selectedItems.length}</p>
-              <p className="text-xs">El pedido será procesado una vez confirmado el pago.</p>
+              <p className="mb-2">
+                <span className="font-medium">Productos en el pedido:</span> {selectedItems.length}
+              </p>
+              <p className="mb-2">
+                <span className="font-medium">Total de items:</span> {selectedItems.reduce((sum, item) => sum + item.quantity, 0)}
+              </p>
+              <p className="text-xs text-gray-500">
+                El pedido será procesado una vez confirmado el pago.
+              </p>
+            </div>
+
+            <div className="mt-6 p-4 bg-teal-50 rounded-lg border border-teal-200">
+              <h3 className="font-semibold text-teal-800 mb-2">Información importante:</h3>
+              <ul className="text-sm text-teal-700 space-y-1">
+                <li>• Tiempo de entrega: 2-5 días hábiles</li>
+                <li>• Horario de atención: Lunes a Viernes 9am - 6pm</li>
+                <li>• Contacto: +51 987 654 321</li>
+              </ul>
             </div>
           </div>
         </div>
       </div>
       <Footer />
+
+      <PaymentModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        onPaymentSubmit={handlePaymentSubmit}
+        total={total}
+        loading={loading}
+      />
     </div>
   );
 };
