@@ -266,7 +266,7 @@ const convertToBase64 = (file) => {
                         onChange={handleChange}
                         required
                         placeholder="Ej: 123456789"
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                        className="w-full border border-gray-300 bg-[var(--bg-cajas)] text-[var(--color-primary)] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)]"
                       />
                     </div>
 
@@ -344,7 +344,7 @@ const convertToBase64 = (file) => {
                             required
                             placeholder="Ej: 987654321"
                             pattern="[0-9]{9}"
-                            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                            className="w-full border border-gray-300 bg-[var(--bg-cajas)] text-[var(--color-primary)] rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)]"
                           />
                         </div>
                     </div>
@@ -448,17 +448,14 @@ const convertToBase64 = (file) => {
               </form>
             </div>
 
-            {/* Columna derecha: QR e información bancaria */}
             <div>
               <h3 className="text-lg font-semibold text-gray-800 mb-4">Información Bancaria</h3>
               
-              {/* QR Code Section */}
               <div className="mb-6">
                 <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-center">
                   <p className="text-sm font-medium text-gray-700 mb-2">Escanear QR para pagar:</p>
-                  <div className="bg-white p-4 rounded inline-block mb-3">
-                    {/* Aquí colocarías tu código QR real */}
-                    <div className="w-48 h-48 bg-gray-200 flex items-center justify-center rounded">
+                  <div className="p-4 rounded inline-block mb-3">
+                    <div className="bg-gray-200 flex items-center justify-center rounded">
                       <img
                         src="/images/QRpagos.jpeg"
                         alt="Código QR para pagos (Yape/Plin)"

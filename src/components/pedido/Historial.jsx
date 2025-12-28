@@ -340,7 +340,7 @@ export const Historial = () => {
                                     placeholder="Buscar por ID de pedido, dirección o método de pago..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="w-full bg-slate-100 text-black pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
+                                    className="w-full bg-[var(--bg-cajas)] text-[var(--primary)] pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent"
                                 />
                                 <svg 
                                     className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" 

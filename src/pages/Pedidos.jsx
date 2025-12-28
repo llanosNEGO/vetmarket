@@ -4,6 +4,7 @@ import { useCart } from '../context/CartContext';
 import { Header } from '../components/Principales/Header';
 import { Footer } from '../components/Principales/footer';
 import { PaymentModal } from '../components/pedido/PagosModal';
+import { pedidosService } from '../services/pedidos';
 
 export const Checkout = () => {
   const { cartItems, getCartTotal, getDiscount, clearCart } = useCart();
@@ -133,6 +134,7 @@ export const Checkout = () => {
       if (formData.distrito) direccionCompleta += `, ${formData.distrito}`;
       if (formData.referencia) direccionCompleta += ` (Referencia: ${formData.referencia})`;
 
+      // Preparar datos del pedido
       const pedidoData = {
         id_cliente: userData.id,
         cliente_nombre: formData.nombres.trim(),
@@ -147,8 +149,7 @@ export const Checkout = () => {
         estado: 'pendiente',
         metodo_pago: paymentData.metodoPago,
         numero_operacion: paymentData.numeroOperacion || null,
-        nombre_comprobante: paymentData.comprobanteNombre || null,
-        fecha_pago: paymentData.fechaPago || null,
+        fecha_pago: paymentData.fechaPago || new Date().toISOString(),
         estado_pago: paymentData.metodoPago === 'efectivo' ? 'pendiente' : 'por_verificar',
         detalles: selectedItems.map(item => {
           const precioUnitario = parsePrice(item.precio);
@@ -168,48 +169,11 @@ export const Checkout = () => {
         })
       };
 
-      const formDataToSend = new FormData();
-      
-      const pedidoDataJSON = JSON.stringify(pedidoData);
-      formDataToSend.append('pedidoData', pedidoDataJSON);
-      
-      
-      if (paymentData.comprobanteArchivo) {
-        formDataToSend.append('comprobante', paymentData.comprobanteArchivo);
-      } else if (paymentData.comprobanteBase64 && paymentData.comprobanteBase64.startsWith('data:')) {
-        const base64Data = paymentData.comprobanteBase64.split(',')[1];
-        const mimeType = paymentData.comprobanteBase64.split(',')[0].split(':')[1].split(';')[0];
-        const byteCharacters = atob(base64Data);
-        const byteArrays = [];
-        
-        for (let offset = 0; offset < byteCharacters.length; offset += 512) {
-          const slice = byteCharacters.slice(offset, offset + 512);
-          const byteNumbers = new Array(slice.length);
-          
-          for (let i = 0; i < slice.length; i++) {
-            byteNumbers[i] = slice.charCodeAt(i);
-          }
-          
-          const byteArray = new Uint8Array(byteNumbers);
-          byteArrays.push(byteArray);
-        }
-        
-        const blob = new Blob(byteArrays, { type: mimeType });
-        const file = new File([blob], paymentData.comprobanteNombre || 'comprobante.jpg', { type: mimeType });
-        formDataToSend.append('comprobante', file);
-      }
-
-      // Enviar con FormData
-      const response = await fetch('http://localhost:3000/api/pedidos', {
-        method: 'POST',
-        body: formDataToSend
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || `Error HTTP: ${response.status}`);
-      }
+      // USAR EL SERVICIO PARA CREAR EL PEDIDO
+      const result = await pedidosService.crearPedidoConComprobante(
+        pedidoData,
+        paymentData.comprobanteArchivo || null
+      );
 
       if (result.success) {
         setPedidoProcesado(true);
@@ -224,15 +188,15 @@ export const Checkout = () => {
           direccion: direccionCompleta,
           estado: 'pendiente',
           metodoPago: paymentData.metodoPago,
-          numeroOperacion: paymentData.numeroOperacion
+          numeroOperacion: paymentData.numeroOperacion,
+          nombreCliente: formData.nombres.trim(),
+          emailCliente: formData.email
         };
         
         localStorage.setItem('ultimoPedido', JSON.stringify(detallesPedido));
-        
-        // Limpiar carrito
+
         clearCart();
-        
-        // Redirigir a confirmación
+
         navigate(`/pedidos-confirmado/${result.data.id_pedido}`, {
           state: {
             pedidoId: result.data.id_pedido,
@@ -247,7 +211,8 @@ export const Checkout = () => {
             metodoPago: paymentData.metodoPago,
             numeroOperacion: paymentData.numeroOperacion || 'N/A',
             clienteNombre: formData.nombres.trim(),
-            clienteEmail: formData.email
+            clienteEmail: formData.email,
+            clienteTelefono: formData.telefono
           }
         });
       } else {
@@ -255,12 +220,45 @@ export const Checkout = () => {
       }
 
     } catch (error) {
+      console.error('Error al procesar el pedido:', error);
       alert(`Error al procesar el pedido: ${error.message}\nPor favor intenta nuevamente.`);
       setShowPaymentModal(true);
     } finally {
       setLoading(false);
     }
   };
+
+  const convertirImagenManual = async (archivo) => {
+    try {
+      return await pedidosService.convertirImagenABase64(archivo);
+    } catch (error) {
+      console.error('Error al convertir imagen:', error);
+      throw error;
+    }
+  };
+
+  // const validarImagenComprobante = async (comprobanteArchivo) => {
+  //   if (!comprobanteArchivo) return true;
+    
+  //   try {
+  //     const maxSize = 5 * 1024 * 1024;
+  //     if (comprobanteArchivo.size > maxSize) {
+  //       alert('La imagen del comprobante no debe superar los 5MB');
+  //       return false;
+  //     }
+      
+  //     const tiposPermitidos = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+  //     if (!tiposPermitidos.includes(comprobanteArchivo.type)) {
+  //       alert('Solo se permiten imágenes JPG, PNG, GIF o WebP');
+  //       return false;
+  //     }
+      
+  //     return true;
+  //   } catch (error) {
+  //     console.error('Error al validar imagen:', error);
+  //     return false;
+  //   }
+  // };
 
   if (selectedItems.length === 0 && !pedidoProcesado) {
     return (
@@ -296,7 +294,7 @@ export const Checkout = () => {
         <h1 className="text-3xl font-bold text-gray-900 mb-8">Finalizar compra</h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Formulario de envío y datos */}
+
           <div className="bg-white rounded-lg shadow-sm p-6">
             <h2 className="text-xl font-bold text-gray-800 mb-6">Información de envío</h2>
             

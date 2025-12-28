@@ -6,12 +6,10 @@ export const PedidoConfirmado = () => {
   const { id } = useParams();
   const location = useLocation();
   const { state } = location;
-  
-  // Si no hay state, intentar obtener de localStorage
+
   if (!state) {
     const ultimoPedido = JSON.parse(localStorage.getItem('ultimoPedido') || '{}');
-    
-    // Si no hay datos, mostrar error
+
     if (!ultimoPedido.id) {
       return (
         <div className="min-h-screen bg-gray-50">
@@ -23,7 +21,7 @@ export const PedidoConfirmado = () => {
                 No se encontraron datos del pedido. Es posible que hayas recargado la página.
               </p>
               <Link
-                to="/pedidos"
+                to="/historial"
                 className="bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-6 rounded-lg transition-colors"
               >
                 Ver mis pedidos
@@ -34,8 +32,7 @@ export const PedidoConfirmado = () => {
         </div>
       );
     }
-    
-    // Usar datos de localStorage
+
     return (
       <div className="min-h-screen bg-gray-50">
         <Header />
@@ -43,7 +40,7 @@ export const PedidoConfirmado = () => {
           <nav className="text-sm text-gray-600 mb-6">
             <Link to="/" className="hover:text-teal-600">Inicio</Link>
             <span className="mx-2">/</span>
-            <Link to="/pedidos" className="hover:text-teal-600">Mis Pedidos</Link>
+            <Link to="/historial" className="hover:text-teal-600">Mis Pedidos</Link>
             <span className="mx-2">/</span>
             <span className="font-semibold text-gray-900">Pedido Confirmado</span>
           </nav>
@@ -95,7 +92,7 @@ export const PedidoConfirmado = () => {
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                to="/pedidos"
+                to="/historial"
                 className="bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-6 rounded-lg transition-colors"
               >
                 Ver mis pedidos
@@ -114,7 +111,6 @@ export const PedidoConfirmado = () => {
     );
   }
 
-  // Usar datos del state (caso normal)
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
@@ -122,7 +118,7 @@ export const PedidoConfirmado = () => {
         <nav className="text-sm text-gray-600 mb-6">
           <Link to="/" className="hover:text-teal-600">Inicio</Link>
           <span className="mx-2">/</span>
-          <Link to="/pedidos" className="hover:text-teal-600">Mis Pedidos</Link>
+          <Link to="/historial" className="hover:text-teal-600">Mis Pedidos</Link>
           <span className="mx-2">/</span>
           <span className="font-semibold text-gray-900">Pedido Confirmado</span>
         </nav>
@@ -174,7 +170,7 @@ export const PedidoConfirmado = () => {
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              to="/pedidos"
+              to="/historial"
               className="bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-6 rounded-lg transition-colors"
             >
               Ver mis pedidos
