@@ -85,10 +85,6 @@ export const CartSummary = () => {
       >
         Continuar compra ({selectedCount})
       </button>
-
-      <p className="text-xs text-gray-500 text-center mt-4">
-        Aceptamos todos los medios de pago
-      </p>
     </div>
   );
 };

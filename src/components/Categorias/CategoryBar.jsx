@@ -204,7 +204,7 @@ export const CategoryBar = () => {
             <div className="container mx-auto px-4">
                 
                 <div className="bg-gray-50 rounded-xl py-4 px-2 sm:px-6 w-full relative">
-                    <ul className="flex flex-nowrap md:justify-around items-center gap-8 overflow-visible">    
+                    <ul className="hidden md:flex flex-nowrap md:justify-around items-center gap-8 overflow-visible">    
                         {categories.map((category, index) => {
                             const isActive = activeCategory === index;
                             const categorySubs = allSubcategories[category.id] || [];

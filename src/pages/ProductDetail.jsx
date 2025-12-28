@@ -45,9 +45,11 @@ export const ProductDetail = () => {
       addToCart({
         id: product.id,
         name: product.descrip,
-        price: `S/ ${product.precio}`,
-        brand: product.marca || 'Sin marca',
-        image: `https://ventas.vetmarket.pe/${product.imagen}`,
+        price:  parseFloat(product.precio),
+        marca: product.marca || 'Sin marca',
+        imagen: product.imagen 
+                              ? `https://ventas.vetmarket.pe/${product.imagen}`
+                              : '/placeholder-product.png',
         seller: 'VetMarket',
         maxQuantity: product.stock || 20
       });
@@ -153,7 +155,7 @@ export const ProductDetail = () => {
                     type="number"
                     value={quantity}
                     onChange={(e) => handleQuantityChange(parseInt(e.target.value) || 1)}
-                    className="w-16 text-center border-x-2 border-gray-300 py-2 font-semibold"
+                    className="w-16 text-center bg-[var(--bg-cajas)] border-x-2 border-gray-300 py-2 font-semibold"
                     min="1"
                     max={product.stock || 20}
                   />
