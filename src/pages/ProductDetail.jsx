@@ -6,6 +6,7 @@ import { ShoppingCart } from 'lucide-react';
 import { CategoryBar } from '../components/Categorias/CategoryBar';
 import { Header } from '../components/Principales/Header';
 import { Footer } from '../components/Principales/footer';
+import toast, { Toaster } from 'react-hot-toast';
 
 export const ProductDetail = () => {
   const { id } = useParams();
@@ -45,15 +46,56 @@ export const ProductDetail = () => {
       addToCart({
         id: product.id,
         name: product.descrip,
-        price:  parseFloat(product.precio),
+        price: parseFloat(product.precio),
         marca: product.marca || 'Sin marca',
         imagen: product.imagen 
-                              ? `https://ventas.vetmarket.pe/${product.imagen}`
-                              : '/placeholder-product.png',
+          ? `https://ventas.vetmarket.pe/${product.imagen}`
+          : '/placeholder-product.png',
         seller: 'VetMarket',
         maxQuantity: product.stock || 20
       });
     }
+    
+    toast.success(
+      (t) => (
+        <div className="flex items-start">
+          <div className="flex-shrink-0">
+            <svg className="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <div className="ml-3">
+            <p className="text-sm font-medium text-gray-900">
+              {quantity > 1 
+                ? `${quantity} productos agregados` 
+                : 'Producto agregado'
+              }
+            </p>
+            <p className="text-sm text-gray-500 mt-1 line-clamp-1">
+              {product.descrip}
+            </p>
+          </div>
+          <button
+            onClick={() => toast.dismiss(t.id)}
+            className="ml-4 flex-shrink-0"
+          >
+            <svg className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+            </svg>
+          </button>
+        </div>
+      ),
+      {
+        duration: 3000,
+        position: 'top-right',
+        style: {
+          background: '#f0fdf4',
+          border: '1px solid #86efac',
+          padding: '16px',
+          maxWidth: '400px',
+        },
+      }
+    );
   };
 
   if (loading) {
@@ -90,9 +132,10 @@ export const ProductDetail = () => {
     <div className="min-h-screen bg-gray-50">
       <Header />
       <CategoryBar />
+
+      <Toaster />
       
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Breadcrumb */}
         <nav className="text-sm text-gray-600 mb-6">
           <Link to="/" className="hover:text-teal-600">Inicio</Link>
           <span className="mx-2">›</span>
@@ -101,10 +144,8 @@ export const ProductDetail = () => {
           <span className="font-semibold text-gray-900">{product.descrip}</span>
         </nav>
 
-        {/* Contenido principal */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 bg-white rounded-lg shadow-sm p-8">
-          
-          {/* Columna izquierda - Imagen */}
+
           <div className="flex items-start justify-center">
             <img
               src={`https://ventas.vetmarket.pe/${product.imagen}`}
@@ -114,31 +155,31 @@ export const ProductDetail = () => {
             />
           </div>
 
-          {/* Columna derecha - Información */}
           <div className="flex flex-col">
-            {/* Marca */}
+
             <p className="text-sm font-semibold text-teal-600 uppercase tracking-wide mb-2">
               {product.marca || 'SIN MARCA'}
             </p>
 
-            {/* Título */}
             <h1 className="text-3xl font-bold text-gray-900 mb-4 leading-tight">
               {product.descrip}
             </h1>
 
-            {/* Descripción */}
             <p className="text-gray-600 mb-6">
               {product.descrip_corta || 'Descripción no disponible.'}
             </p>
 
-            {/* Precio */}
             <div className="mb-8">
               <p className="text-4xl font-bold text-gray-900">
                 S/ {product.precio}
               </p>
+              {quantity > 1 && (
+                <p className="text-lg text-gray-600 mt-2">
+                  Total: S/ {(parseFloat(product.precio) * quantity).toFixed(2)}
+                </p>
+              )}
             </div>
 
-            {/* Controles de cantidad */}
             <div className="mb-8">
               <label className="block text-gray-700 font-medium mb-3">
                 Cantidad
@@ -172,16 +213,14 @@ export const ProductDetail = () => {
               </div>
             </div>
 
-            {/* Botón agregar al carrito */}
             <button
               onClick={handleAddToCart}
-              className="w-full bg-green-700 hover:bg-green-800 text-white font-bold py-4 px-6 rounded-lg flex items-center justify-center gap-3 transition-colors text-lg"
+              className="w-full bg-green-700 hover:bg-green-800 text-white font-bold py-4 px-6 rounded-lg flex items-center justify-center gap-3 transition-colors text-lg group"
             >
-              <ShoppingCart size={24} />
-              Agregar al carrito
+              <ShoppingCart size={24} className="group-hover:scale-110 transition-transform" />
+              Agregar al carrito {quantity > 1 && `(${quantity})`}
             </button>
 
-            {/* Información adicional */}
             <div className="mt-8 pt-8 border-t border-gray-200">
               <div className="space-y-3 text-sm">
                 <div className="flex justify-between">
