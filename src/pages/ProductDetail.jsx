@@ -185,7 +185,7 @@ export const ProductDetail = () => {
                 Cantidad
               </label>
               <div className="flex items-center gap-4">
-                <div className="flex items-center border-2 border-gray-300 rounded-lg">
+                <div className="flex items-center border-2  rounded-lg">
                   <button
                     onClick={() => handleQuantityChange(quantity - 1)}
                     className="px-4 py-2 text-gray-700 hover:bg-gray-100 font-bold text-xl"
@@ -218,7 +218,7 @@ export const ProductDetail = () => {
               className="w-full bg-green-700 hover:bg-green-800 text-white font-bold py-4 px-6 rounded-lg flex items-center justify-center gap-3 transition-colors text-lg group"
             >
               <ShoppingCart size={24} className="group-hover:scale-110 transition-transform" />
-              Agregar al carrito {quantity > 1 && `(${quantity})`}
+              Agregar {quantity > 1 && `(${quantity})`}
             </button>
 
             <div className="mt-8 pt-8 border-t border-gray-200">

@@ -17,8 +17,6 @@ export const authService = {
 };
 
 export const userService = {
-  getStats: () => 
-    api.get('/users/stats'),
   
   getAll: () => 
     api.get('/users'),

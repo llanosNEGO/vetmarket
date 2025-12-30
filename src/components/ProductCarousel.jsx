@@ -49,11 +49,6 @@ export default function ProductCarousel() {
     toast.success(
       (t) => (
         <div className="flex items-start">
-          <div className="flex-shrink-0">
-            <svg className="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
           <div className="ml-3">
             <p className="text-sm font-medium text-gray-900">Producto agregado</p>
             <p className="text-sm text-gray-500 mt-1 line-clamp-1">
@@ -158,7 +153,7 @@ export default function ProductCarousel() {
                   className="w-full bg-green-700 hover:bg-green-800 text-white font-bold py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors group"
                 >
                   <ShoppingCart size={20} className="group-hover:scale-110 transition-transform" />
-                  <span>Agregar al carrito</span>
+                  <span>Agregar</span>
                 </button>
               </div>
             </SwiperSlide>

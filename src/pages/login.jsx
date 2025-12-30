@@ -53,14 +53,12 @@ export const Login = () => {
                 setAuthenticatedUser(userData);
                 navigate("/");
             } catch (err) {
-                console.error("Error en login con Google:", err);
                 setError("No se pudo iniciar sesión con Google");
             } finally {
                 setIsLoading(false);
             }
         },
         onError: (errorResponse) => {
-            console.error("Google OAuth error:", errorResponse);
             setError("No se pudo iniciar sesión con Google");
             setIsLoading(false);
         },
@@ -99,18 +97,6 @@ export const Login = () => {
         }
     };
 
-    const handleFacebookLogin = () => {
-        setIsLoading(true);
-        setError("");
-        // Lógica para login con Facebook
-        console.log("Facebook login");
-        // Aquí puedes integrar con tu backend para login con Facebook
-        setTimeout(() => {
-            setIsLoading(false);
-            setError("Login con Facebook no implementado aún");
-        }, 1500);
-    };
-
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
             <div className="sm:mx-auto sm:w-full sm:max-w-md">
@@ -124,14 +110,13 @@ export const Login = () => {
                     </Link>
                 </div>
                 <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                    Iniciar sesión en tu cuenta
+                    Iniciar sesión
                 </h2>
             </div>
 
             <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
                 <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-                    
-                    {/* Mostrar error */}
+
                     {error && (
                         <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
                             {error}
@@ -154,17 +139,6 @@ export const Login = () => {
                             Continuar con Google
                         </button>
 
-                        <button
-                            type="button"
-                            onClick={handleFacebookLogin}
-                            disabled={isLoading}
-                            className="w-full flex justify-center items-center py-3 px-4 border border-gray-300 rounded-md shadow-sm bg-[#1877F2] text-sm font-medium text-white hover:bg-[#166FE5] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#1877F2] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            <svg className="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                            </svg>
-                            Continuar con Facebook
-                        </button>
                     </div>
 
                     <div className="mt-6">
@@ -178,7 +152,6 @@ export const Login = () => {
                         </div>
                     </div>
 
-                    {/* Formulario de login tradicional */}
                     <form className="mt-6 space-y-6" onSubmit={handleSubmit}>
                         <div>
                             <label htmlFor="email" className="block text-sm font-medium text-gray-900">
@@ -262,14 +235,6 @@ export const Login = () => {
                         </div>
                     </form>
 
-                    {/* <div className="mt-6 text-center">
-                        <p className="text-sm text-gray-600">
-                            ¿No tienes una cuenta?{" "}
-                            <Link to="/register" className="font-medium text-[var(--primary)] hover:text-[var(--primary-dark)]">
-                                Regístrate aquí
-                            </Link>
-                        </p>
-                    </div> */}
                 </div>
             </div>
         </div>

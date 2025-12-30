@@ -149,9 +149,6 @@ export const Historial = () => {
     const getEstadoTexto = (estado) => {
         const estados = {
             'pendiente': 'Pendiente',
-            'procesando': 'Procesando',
-            'en_camino': 'En camino',
-            'entregado': 'Entregado',
             'cancelado': 'Cancelado'
         };
         return estados[estado] || estado;
@@ -303,7 +300,7 @@ export const Historial = () => {
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <div className="bg-white rounded-lg shadow p-4">
                         <p className="text-sm font-medium text-gray-500">Total de pedidos</p>
                         <p className="text-2xl font-bold text-gray-900">{orders.length}</p>
@@ -312,21 +309,6 @@ export const Historial = () => {
                         <p className="text-sm font-medium text-gray-500">Pendientes</p>
                         <p className="text-2xl font-bold text-yellow-600">
                             {orders.filter(o => o.estado?.toLowerCase().trim() === 'pendiente').length}
-                        </p>
-                    </div>
-                    <div className="bg-white rounded-lg shadow p-4">
-                        <p className="text-sm font-medium text-gray-500">En proceso</p>
-                        <p className="text-2xl font-bold text-blue-600">
-                            {orders.filter(o => {
-                                const estado = o.estado?.toLowerCase().trim();
-                                return estado === 'procesando' || estado === 'en_camino';
-                            }).length}
-                        </p>
-                    </div>
-                    <div className="bg-white rounded-lg shadow p-4">
-                        <p className="text-sm font-medium text-gray-500">Entregados</p>
-                        <p className="text-2xl font-bold text-green-600">
-                            {orders.filter(o => o.estado?.toLowerCase().trim() === 'entregado').length}
                         </p>
                     </div>
                 </div>
@@ -360,9 +342,6 @@ export const Historial = () => {
                             >
                                 <option value="todos">Todos los estados</option>
                                 <option value="pendiente">Pendiente</option>
-                                <option value="procesando">Procesando</option>
-                                <option value="en_camino">En camino</option>
-                                <option value="entregado">Entregado</option>
                                 <option value="cancelado">Cancelado</option>
                             </select>
                             <button
@@ -541,7 +520,7 @@ export const Historial = () => {
                                             {[...Array(totalPages)].map((_, index) => {
                                                 const pageNumber = index + 1;
                                                 const isCurrentPage = pageNumber === currentPage;
-                                                const isNearCurrent = Math.abs(pageNumber - currentPage) <= 2;
+                                                const isNearTuCurrent = Math.abs(pageNumber - currentPage) <= 2;
                                                 const isFirstPage = pageNumber === 1;
                                                 const isLastPage = pageNumber === totalPages;
 

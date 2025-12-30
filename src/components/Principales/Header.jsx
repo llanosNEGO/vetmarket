@@ -95,9 +95,12 @@ export const Header = () => {
                                     Mis Pedidos
                                 </Link>
 
-                                <div className="h-10 w-10 flex items-center justify-center rounded-full bg-[var(--primary)] text-white font-semibold">
-                                    {userInitial || 'U'}
-                                </div>
+                                <Link to="/welcome" className="flex items-center space-x-2">
+                                    <div className="h-10 w-10 flex items-center justify-center rounded-full bg-[var(--primary)] text-white font-semibold">
+                                        {userInitial || 'U'}
+                                    </div>
+                                </Link>
+
                                 <button
                                     onClick={handleLogout}
                                     className="px-3 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600 rounded-md transition-colors"
