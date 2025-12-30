@@ -5,7 +5,9 @@ import { useCart } from '../context/CartContext';
 import { Header } from '../components/Principales/Header';
 import { Footer } from '../components/Principales/footer';
 import { CategoryBar } from '../components/Categorias/CategoryBar';
-
+import { Check } from 'lucide-react';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export const CategoryProducts = () => {
     const { categoryId, categoryName } = useParams();
@@ -26,7 +28,6 @@ export const CategoryProducts = () => {
         }
     }, []);
 
-    // Función recursiva para obtener todos los IDs de subcategorías
     const getAllSubcategoryIds = useCallback((category) => {
         let ids = [category.id];
 
@@ -39,13 +40,65 @@ export const CategoryProducts = () => {
         return ids;
     }, []);
 
+    const handleAddToCart = (e, product) => {
+        e.stopPropagation();
+        
+        const productToAdd = {
+            id: product.id,
+            nombre: product.nombre || product.descrip,
+            precio: parseFloat(product.precio || 0),
+            imagen: product.imagen 
+                ? `https://ventas.vetmarket.pe/${product.imagen}`
+                : '/placeholder-product.png',
+            marca: product.marca
+        };
+        
+        addToCart(productToAdd);
+
+        // Mostrar notificación
+        toast.success(
+            <div className="flex items-start gap-4">
+                <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-gray-900 line-clamp-2 mb-2">
+                        {product.nombre || product.descrip || product.nom}
+                    </p>
+                    <div className="flex items-center justify-between">
+                        <span className="text-xs text-gray-500">Agregado al carrito</span>
+                        <span className="text-sm font-bold text-green-600 whitespace-nowrap">
+                            S/ {parseFloat(product.precio || product.price || 0).toFixed(2)}
+                        </span>
+                    </div>
+                </div>
+            </div>,
+            {
+                position: "bottom-right",
+                autoClose: 2500,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+                style: {
+                    borderRadius: '12px',
+                    padding: '16px',
+                    maxWidth: '420px',
+                    minWidth: '320px',
+                    borderLeft: '4px solid #10b981',
+                    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)',
+                    overflow: 'hidden',
+                },
+                bodyClassName: "p-0",
+            }
+        );
+    };
+
     useEffect(() => {
         const fetchProducts = async () => {
             setLoading(true);
             setError(null);
 
             try {
-                // Obtener todas las categorías
                 const categoriesResponse = await axios.get('/data/categorias.php');
                 const categories = categoriesResponse.data.value || categoriesResponse.data;
 
@@ -54,7 +107,6 @@ export const CategoryProducts = () => {
 
                 console.log("Buscando categoría:", decodedCategoryName, "(ID:", categoryId, ")");
 
-                // Buscar la categoría actual por nombre
                 const currentCategory = categories.find((cat) => {
                     const matchesId = categoryId ? String(cat.id) === String(categoryId) : false;
                     const matchesName = decodedCategoryName
@@ -71,19 +123,16 @@ export const CategoryProducts = () => {
                     return;
                 }
 
-                // Obtener todos los IDs de subcategorías recursivamente
                 const allCategoryIds = getAllSubcategoryIds(currentCategory);
                 console.log("IDs a consultar:", allCategoryIds);
 
                 let allProducts = [];
 
-                // Obtener TODOS los productos
                 const productsResponse = await axios.get('/data/productos.php');
                 const allProductsData = productsResponse.data.value || productsResponse.data || [];
                 
                 console.log('Total de productos obtenidos:', allProductsData.length);
 
-                // Filtrar productos que pertenezcan a alguna de las categorías/subcategorías
                 allProducts = allProductsData.filter(product => 
                     allCategoryIds.includes(product.idcat)
                 );
@@ -96,7 +145,6 @@ export const CategoryProducts = () => {
                     setError("No hay productos disponibles en esta categoría");
                     setProducts([]);
                 } else {
-                    // Eliminar duplicados por ID
                     const uniqueProducts = allProducts.filter(
                         (product, index, self) =>
                             index === self.findIndex((p) => p.id === product.id)
@@ -125,29 +173,44 @@ export const CategoryProducts = () => {
         navigate(`/product/${productId}`);
     };
 
-    const handleAddToCart = (e, product) => {
-        e.stopPropagation();
-        
-        const productToAdd = {
-            id: product.id,
-            nombre: product.nombre || product.descrip,
-            precio: parseFloat(product.precio || 0),
-            imagen: product.imagen 
-                ? `https://ventas.vetmarket.pe/${product.imagen}`
-                : '/placeholder-product.png',
-            marca: product.marca
-        };
-        
-        addToCart(productToAdd);
-    };
-
     return (
         <div className="min-h-screen flex flex-col bg-gray-50">
             <Header />
             <CategoryBar />
 
+            {/* ToastContainer */}
+            <ToastContainer
+                position="bottom-right"
+                autoClose={2500}
+                hideProgressBar={false}
+                newestOnTop
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss={false}
+                draggable
+                pauseOnHover
+                theme="light"
+                style={{
+                    zIndex: 9999,
+                    bottom: '20px',
+                    right: '20px',
+                }}
+                toastStyle={{
+                    borderRadius: '12px',
+                    marginBottom: '12px',
+                    padding: '0',
+                    maxWidth: '420px',
+                    minWidth: '320px',
+                    overflow: 'hidden',
+                }}
+                bodyClassName="p-0"
+                progressStyle={{
+                    background: 'linear-gradient(to right, #10b981, #34d399)',
+                    height: '3px',
+                }}
+            />
+
             <main className="flex-grow container mx-auto px-4 py-8">
-                {/* Breadcrumb */}
                 <nav className="flex items-center gap-2 text-sm mb-6">
                     <a href="/" className="text-gray-600 hover:text-[#008B9C]">
                         Inicio
@@ -162,14 +225,12 @@ export const CategoryProducts = () => {
                     {decodeParam(categoryName) || 'Categoría'}
                 </h1>
 
-                {/* Loading */}
                 {loading && (
                     <div className="flex justify-center items-center py-20">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#008B9C]"></div>
                     </div>
                 )}
 
-                {/* Error */}
                 {error && (
                     <div className="bg-blue-50 border border-blue-200 text-blue-700 px-6 py-4 rounded-lg flex items-start gap-3">
                         <svg className="w-6 h-6 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -182,7 +243,6 @@ export const CategoryProducts = () => {
                     </div>
                 )}
 
-                {/* Productos */}
                 {!loading && !error && (
                     <>
                         {products.length === 0 ? (
@@ -223,7 +283,7 @@ export const CategoryProducts = () => {
                                                 {product.nombre || product.nom || product.descrip}
                                             </h3>
 
-                                            <p className="text-xl font-bold text-gray-900 mb-3">
+                                            <p className="text-xl font-bold text-green-600 mb-3">
                                                 S/ {parseFloat(product.precio || product.price || 0).toFixed(2)}
                                             </p>
 

@@ -2,11 +2,13 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import axios from 'axios';
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingCart, Check } from 'lucide-react';
 import { CategoryBar } from '../components/Categorias/CategoryBar';
 import { Header } from '../components/Principales/Header';
 import { Footer } from '../components/Principales/footer';
-import toast, { Toaster } from 'react-hot-toast';
+import { ToastContainer, toast } from 'react-toastify';
+
+import 'react-toastify/dist/ReactToastify.css';
 
 export const ProductDetail = () => {
   const { id } = useParams();
@@ -57,43 +59,40 @@ export const ProductDetail = () => {
     }
     
     toast.success(
-      (t) => (
-        <div className="flex items-start">
-          <div className="flex-shrink-0">
-            <svg className="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
+      <div className="flex items-start gap-4">
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-gray-900 line-clamp-2 mb-2">
+            {product.descrip}
+          </p>
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-gray-500">
+              {quantity > 1 ? `${quantity} productos agregados` : 'Agregado al carrito'}
+            </span>
+            <span className="text-sm font-bold text-green-600 whitespace-nowrap">
+              S/ {(parseFloat(product.precio) * quantity).toFixed(2)}
+            </span>
           </div>
-          <div className="ml-3">
-            <p className="text-sm font-medium text-gray-900">
-              {quantity > 1 
-                ? `${quantity} productos agregados` 
-                : 'Producto agregado'
-              }
-            </p>
-            <p className="text-sm text-gray-500 mt-1 line-clamp-1">
-              {product.descrip}
-            </p>
-          </div>
-          <button
-            onClick={() => toast.dismiss(t.id)}
-            className="ml-4 flex-shrink-0"
-          >
-            <svg className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-            </svg>
-          </button>
         </div>
-      ),
+      </div>,
       {
-        duration: 3000,
-        position: 'top-right',
+        position: "bottom-right",
+        autoClose: 2500,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
         style: {
-          background: '#f0fdf4',
-          border: '1px solid #86efac',
+          borderRadius: '12px',
           padding: '16px',
-          maxWidth: '400px',
+          maxWidth: '420px',
+          minWidth: '320px',
+          borderLeft: '4px solid #10b981',
+          boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)',
+          overflow: 'hidden',
         },
+        bodyClassName: "p-0",
       }
     );
   };
@@ -133,7 +132,36 @@ export const ProductDetail = () => {
       <Header />
       <CategoryBar />
 
-      <Toaster />
+      <ToastContainer
+        position="bottom-right"
+        autoClose={2500}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss={false}
+        draggable
+        pauseOnHover
+        theme="light"
+        style={{
+          zIndex: 9999,
+          bottom: '20px',
+          right: '20px',
+        }}
+        toastStyle={{
+          borderRadius: '12px',
+          marginBottom: '12px',
+          padding: '0',
+          maxWidth: '420px',
+          minWidth: '320px',
+          overflow: 'hidden',
+        }}
+        bodyClassName="p-0"
+        progressStyle={{
+          background: 'linear-gradient(to right, #10b981, #34d399)',
+          height: '3px',
+        }}
+      />
       
       <div className="max-w-7xl mx-auto px-4 py-8">
         <nav className="text-sm text-gray-600 mb-6">
@@ -170,7 +198,7 @@ export const ProductDetail = () => {
             </p>
 
             <div className="mb-8">
-              <p className="text-4xl font-bold text-gray-900">
+              <p className="text-4xl font-bold text-green-600">
                 S/ {product.precio}
               </p>
               {quantity > 1 && (
@@ -185,7 +213,7 @@ export const ProductDetail = () => {
                 Cantidad
               </label>
               <div className="flex items-center gap-4">
-                <div className="flex items-center border-2  rounded-lg">
+                <div className="flex items-center border-2 rounded-lg">
                   <button
                     onClick={() => handleQuantityChange(quantity - 1)}
                     className="px-4 py-2 text-gray-700 hover:bg-gray-100 font-bold text-xl"

@@ -4,12 +4,13 @@ import { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { ShoppingCart } from 'lucide-react';
-import toast, { Toaster } from 'react-hot-toast';
+import { ShoppingCart, Check } from 'lucide-react';
+import { ToastContainer, toast } from 'react-toastify';
 
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/autoplay';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function ProductCarousel() {
   const [products, setProducts] = useState([]);
@@ -47,33 +48,38 @@ export default function ProductCarousel() {
     });
 
     toast.success(
-      (t) => (
-        <div className="flex items-start">
-          <div className="ml-3">
-            <p className="text-sm font-medium text-gray-900">Producto agregado</p>
-            <p className="text-sm text-gray-500 mt-1 line-clamp-1">
-              {product.descrip || product.name}
-            </p>
+      <div className="flex items-start gap-4">
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-gray-900 line-clamp-2 mb-2">
+            {product.descrip || product.name}
+          </p>
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-gray-500">Agregado al carrito</span>
+            <span className="text-sm font-bold text-green-600">
+              S/ {product.precio || '0.00'}
+            </span>
           </div>
-          <button
-            onClick={() => toast.dismiss(t.id)}
-            className="ml-4 flex-shrink-0"
-          >
-            <svg className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-            </svg>
-          </button>
         </div>
-      ),
+      </div>,
       {
-        duration: 3000,
-        position: 'top-right',
+        position: "bottom-right",
+        autoClose: 2500,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
         style: {
-          background: '#f0fdf4',
-          border: '1px solid #86efac',
+          borderRadius: '12px',
           padding: '16px',
-          maxWidth: '400px',
+          maxWidth: '420px',
+          minWidth: '320px',
+          borderLeft: '4px solid #10b981',
+          boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)',
+          overflow: 'hidden',
         },
+        bodyClassName: "p-0",
       }
     );
   };
@@ -92,7 +98,36 @@ export default function ProductCarousel() {
 
   return (
     <>
-      <Toaster />
+      <ToastContainer
+        position="bottom-right"
+        autoClose={2500}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss={false}
+        draggable
+        pauseOnHover
+        theme="light"
+        style={{
+          zIndex: 9999,
+          bottom: '20px',
+          right: '20px',
+        }}
+        toastStyle={{
+          borderRadius: '12px',
+          marginBottom: '12px',
+          padding: '0',
+          maxWidth: '420px',
+          minWidth: '320px',
+          overflow: 'hidden',
+        }}
+        bodyClassName="p-0"
+        progressStyle={{
+          background: 'linear-gradient(to right, #10b981, #34d399)',
+          height: '3px',
+        }}
+      />
 
       <div className="w-full max-w-[1610px] mx-auto py-10 px-4 md:px-12 relative">
         <h1 className="text-center text-2xl font-bold mb-8 text-black">
