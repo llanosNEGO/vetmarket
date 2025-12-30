@@ -2,6 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Forzar color en inputs con autocompletado */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-text-fill-color: var(--secondary) !important;
+  -webkit-box-shadow: 0 0 0px 1000px var(--bg-cajas) inset !important;
+  transition: background-color 5000s ease-in-out 0s !important;
+}
+
+/* También para todos los inputs */
+input {
+  color: var(--secondary) !important;
+}
+
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
 
@@ -15,6 +30,8 @@
   -moz-osx-font-smoothing: grayscale;
   --primary: #4D8F21;
   --primary-dark: rgb(128, 128, 128);
+  --secondary: #1A3D03;
+  --bg-cajas: #F1F5F9;
 }
 /* 
 a {

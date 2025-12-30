@@ -1,33 +1,100 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useGoogleLogin } from "@react-oauth/google";
+import { authService } from "../services/api";
+import { useAuth } from "../context/AuthContext.jsx";
 
 export const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState("");
+    const navigate = useNavigate();
+    const { user, login: setAuthenticatedUser } = useAuth();
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        setIsLoading(true);
-        // Simular proceso de login
-        setTimeout(() => {
-            console.log("Login attempt:", { email, password });
+    useEffect(() => {
+        if (user) {
+            navigate("/");
+        }
+    }, [user, navigate]);
+
+    const googleLogin = useGoogleLogin({
+        scope: "openid profile email",
+        onSuccess: async (tokenResponse) => {
+            try {
+                const userInfoResponse = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+                    headers: {
+                        Authorization: `Bearer ${tokenResponse.access_token}`,
+                    },
+                });
+
+                if (!userInfoResponse.ok) {
+                    throw new Error("No se pudo obtener la información del perfil de Google");
+                }
+
+                const profile = await userInfoResponse.json();
+                let userData = {
+                    id: profile.sub,
+                    names: profile.name,
+                    email: profile.email,
+                    avatar: profile.picture,
+                    provider: "google",
+                };
+
+                try {
+                    const response = await authService.loginWithGoogle(tokenResponse.access_token, profile);
+                    if (response?.data?.success && response?.data?.user) {
+                        userData = response.data.user;
+                    }
+                } catch (apiError) {
+                    console.warn("Endpoint /auth/google no disponible, usando datos de Google", apiError);
+                }
+
+                setAuthenticatedUser(userData);
+                navigate("/");
+            } catch (err) {
+                setError("No se pudo iniciar sesión con Google");
+            } finally {
+                setIsLoading(false);
+            }
+        },
+        onError: (errorResponse) => {
+            setError("No se pudo iniciar sesión con Google");
             setIsLoading(false);
-        }, 1500);
+        },
+    });
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError("");
+        setIsLoading(true);
+
+        try {
+            const response = await authService.login(email, password);
+            
+            if (response.data.success) {
+                setAuthenticatedUser(response.data.user);
+                navigate("/");
+            }
+        } catch (err) {
+            console.error("Error en login:", err);
+            setError(err.response?.data?.error || "Error de conexión con el servidor");
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const handleGoogleLogin = () => {
+        setError("");
         setIsLoading(true);
-        // Lógica para login con Google
-        console.log("Google login");
-        setTimeout(() => setIsLoading(false), 1500);
-    };
 
-    const handleFacebookLogin = () => {
-        setIsLoading(true);
-        // Lógica para login con Facebook
-        console.log("Facebook login");
-        setTimeout(() => setIsLoading(false), 1500);
+        try {
+            googleLogin();
+        } catch (err) {
+            console.error("Error iniciando Google OAuth:", err);
+            setError("No se pudo iniciar sesión con Google");
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -36,25 +103,26 @@ export const Login = () => {
                 <div className="flex justify-center">
                     <Link to="/">
                         <img 
-                            src="../public/images/logo_vetmarketpe.svg" 
+                            src="/images/logo_vetmarketpe.svg" 
                             alt="VetMarketPE" 
                             className="h-16 w-auto"
                         />
                     </Link>
                 </div>
                 <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                    Iniciar sesión en tu cuenta
+                    Iniciar sesión
                 </h2>
-                <p className="mt-2 text-center text-sm text-gray-600">
-                    O{" "}
-                    <a href="#" className="font-medium text-[var(--primary)] hover:text-[var(--primary-dark)]">
-                        regístrate como nuevo cliente
-                    </a>
-                </p>
             </div>
 
             <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
                 <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+
+                    {error && (
+                        <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+                            {error}
+                        </div>
+                    )}
+
                     <div className="space-y-3">
                         <button
                             type="button"
@@ -71,17 +139,6 @@ export const Login = () => {
                             Continuar con Google
                         </button>
 
-                        <button
-                            type="button"
-                            onClick={handleFacebookLogin}
-                            disabled={isLoading}
-                            className="w-full flex justify-center items-center py-3 px-4 border border-gray-300 rounded-md shadow-sm bg-[#1877F2] text-sm font-medium text-white hover:bg-[#166FE5] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#1877F2] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            <svg className="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                            </svg>
-                            Continuar con Facebook
-                        </button>
                     </div>
 
                     <div className="mt-6">
@@ -95,7 +152,6 @@ export const Login = () => {
                         </div>
                     </div>
 
-                    {/* Formulario de login tradicional */}
                     <form className="mt-6 space-y-6" onSubmit={handleSubmit}>
                         <div>
                             <label htmlFor="email" className="block text-sm font-medium text-gray-900">
@@ -110,7 +166,8 @@ export const Login = () => {
                                     required
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    className="appearance-none block text-black bg-gray-200 w-full px-3 py-2 border border-gray-200 rounded-md placeholder-gray-400 focus:outline-none focus:ring-[var(--primary)] focus:border-[var(--primary)] sm:text-sm"
+                                    disabled={isLoading}
+                                    className="appearance-none block text-black bg-gray-200 w-full px-3 py-2 border border-gray-200 rounded-md placeholder-gray-400 focus:outline-none focus:ring-[var(--primary)] focus:border-[var(--primary)] sm:text-sm disabled:opacity-50"
                                     placeholder="correo@gmail.com"
                                 />
                             </div>
@@ -129,7 +186,8 @@ export const Login = () => {
                                     required
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="appearance-none block w-full text-black bg-gray-200 px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-[var(--primary)] focus:border-[var(--primary)] sm:text-sm"
+                                    disabled={isLoading}
+                                    className="appearance-none block w-full text-black bg-gray-200 px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-[var(--primary)] focus:border-[var(--primary)] sm:text-sm disabled:opacity-50"
                                     placeholder="Tu contraseña"
                                 />
                             </div>
@@ -141,7 +199,8 @@ export const Login = () => {
                                     id="remember-me"
                                     name="remember-me"
                                     type="checkbox"
-                                    className="h-4 w-4 text-[var(--primary)] focus:ring-[var(--primary)] border-gray-300 rounded"
+                                    disabled={isLoading}
+                                    className="h-4 w-4 text-[var(--primary)] focus:ring-[var(--primary)] border-gray-300 rounded disabled:opacity-50"
                                 />
                                 <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
                                     Recordarme
@@ -176,14 +235,6 @@ export const Login = () => {
                         </div>
                     </form>
 
-                    <div className="mt-6 text-center">
-                        <p className="text-sm text-gray-600">
-                            ¿No tienes una cuenta?{" "}
-                            <Link to="/register" className="font-medium text-[var(--primary)] hover:text-[var(--primary-dark)]">
-                                Regístrate aquí
-                            </Link>
-                        </p>
-                    </div>
                 </div>
             </div>
         </div>
